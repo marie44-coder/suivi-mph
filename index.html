@@ -177,7 +177,7 @@ function init(rawData,rawEffets,apiKey){
     const n=rows.length;
     const nPrise=rows.filter(r=>r.prise==='Oui').length;
 
-    const effVals=rows.map(r=>{const v=parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto_rapportee'));return isNaN(v)?null:v;}).filter(v=>v!=null);
+    const effVals=rows.map(r=>{const v=parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto-rapportee'));return isNaN(v)?null:v;}).filter(v=>v!=null);
     const avgEff=effVals.length?Math.round(avg(effVals)*100):null;
 
     const priseVals=rows.map(r=>toMin(r.heure_prise)).filter(v=>v!=null);

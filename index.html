@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi traitement TDAH</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#0f1117;color:#fff;font-family:'DM Sans',sans-serif;min-height:100vh;}
+.app{max-width:1100px;margin:0 auto;padding:0 24px 60px;}
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;}
+.spinner{width:32px;height:32px;border:2px solid #ffffff15;border-top:2px solid #378ADD;border-radius:50%;animation:spin 0.8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.load-text{font-size:13px;color:#555;}
+.error-box{background:#2a1010;border:0.5px solid #D85A3044;border-radius:12px;padding:16px;margin:20px 0;font-size:13px;color:#F09595;line-height:1.6;}
+.cover{background:#0d1629;padding:32px 36px 28px;border-radius:0 0 20px 20px;margin-bottom:24px;}
+.cover-inner{display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+.mol{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:3px;color:#378ADD88;margin-bottom:8px;}
+.ctitle{font-size:30px;font-weight:500;color:#fff;margin-bottom:4px;}
+.csub{font-size:14px;color:#378ADD66;margin-bottom:18px;}
+.ckpis{display:flex;gap:12px;}
+.ckpi{background:#0C447C22;border:0.5px solid #378ADD22;border-radius:12px;padding:12px 18px;text-align:center;min-width:100px;}
+.ckpi-v{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;color:#85B7EB;}
+.ckpi-l{font-size:12px;color:#378ADD55;margin-top:3px;}
+.cdate{font-size:12px;color:#378ADD33;margin-top:10px;}
+.cover-right{display:flex;flex-direction:column;align-items:flex-end;gap:10px;}
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:#161920;border-radius:12px;padding:4px;}
+.tab{flex:1;text-align:center;padding:12px 20px;font-size:14px;color:#666;cursor:pointer;border-radius:10px;transition:all 0.2s;border:none;background:transparent;font-family:'DM Sans',sans-serif;}
+.tab.active{background:#1e2235;color:#fff;}
+.tab:hover:not(.active){color:#aaa;}
+.refresh-btn{background:transparent;border:0.5px solid #378ADD33;border-radius:8px;padding:8px 16px;font-size:12px;color:#378ADD66;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.refresh-btn:hover{border-color:#378ADD;color:#378ADD;}
+.reset-btn{background:transparent;border:0.5px solid #ffffff15;border-radius:8px;padding:8px 16px;font-size:12px;color:#666;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.reset-btn:hover{border-color:#aaa;color:#aaa;}
+.filters{background:#161920;border:0.5px solid #ffffff08;border-radius:12px;padding:16px 18px;margin-bottom:20px;}
+.filters-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.filters-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.1em;}
+.filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
+.filter-pill{background:#1e2235;border:0.5px solid #ffffff0f;border-radius:8px;padding:9px 13px;font-size:13px;color:#aaa;width:100%;cursor:pointer;appearance:none;-webkit-appearance:none;outline:none;}
+.date-wrap{display:flex;flex-direction:column;gap:4px;}
+.date-label{font-size:11px;color:#444;}
+.date-input{background:#1e2235;border:0.5px solid #ffffff0f;border-radius:8px;padding:8px 12px;font-size:13px;color:#aaa;width:100%;outline:none;font-family:'DM Sans',sans-serif;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+@media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr;}.cover-inner{flex-direction:column;}.ckpis{flex-wrap:wrap;}}
+.sec{margin-bottom:28px;}
+.slabel{font-size:12px;font-weight:500;color:#555;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;}
+.kcard{border-radius:12px;padding:16px 18px;margin-bottom:14px;}
+.kcard.g{background:#04342C;border-left:3px solid #1D9E75;}
+.kcard.b{background:#042C53;border-left:3px solid #378ADD;}
+.kcard.o{background:#4A1B0C;border-left:3px solid #D85A30;}
+.klabel{font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
+.kval{font-family:'DM Mono',monospace;font-size:32px;font-weight:500;}
+.kval.g{color:#1D9E75;}.kval.b{color:#378ADD;}.kval.o{color:#D85A30;}
+.ksub{font-size:12px;color:#555;margin-top:5px;}
+.ksub .hi{color:#1D9E75;}.ksub .lo{color:#D85A30;}.ksub .bl{color:#378ADD;}
+.mini{background:#1e2235;border-radius:12px;padding:14px 16px;}
+.mini-l{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+.mini-v{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;}
+.chart-card{background:#1a1e2e;border:0.5px solid #ffffff08;border-radius:12px;padding:18px;margin-bottom:14px;}
+.ct{font-size:13px;color:#777;margin-bottom:12px;}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:10px;font-size:12px;color:#666;}
+.legend span{display:flex;align-items:center;gap:5px;}
+.lsq{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.bar-name{font-size:13px;color:#aaa;width:140px;flex-shrink:0;}
+.bar-track{flex:1;background:#ffffff08;border-radius:4px;height:8px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;}
+.bar-v{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;width:28px;text-align:right;flex-shrink:0;}
+.occs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.occ{background:#1e2235;border-radius:12px;padding:14px;text-align:center;}
+.occ-v{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;}
+.occ-l{font-size:12px;color:#555;margin-top:4px;}
+.no-data{font-size:13px;color:#555;text-align:center;padding:24px 0;}
+.divider{border:none;border-top:0.5px solid #ffffff08;margin:8px 0 24px;}
+.insight{font-size:12px;color:#888;margin-top:10px;padding-top:10px;border-top:0.5px solid #ffffff08;line-height:1.6;}
+.insight.pos{color:#1D9E75;}.insight.warn{color:#EF9F27;}.insight.neu{color:#378ADD;}
+.disclaimer{background:#2a2010;border-left:3px solid #EF9F27;border-radius:0;border-top-right-radius:10px;border-bottom-right-radius:10px;padding:12px 16px;font-size:13px;color:#FAC775;line-height:1.5;margin-bottom:24px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const SHEET_ID='1BZWdgCe6JFlP8yVGkcjuqke0TDeqrbvhXUhaJy1NpxM';
+const gc='rgba(255,255,255,0.06)';const tc='#555';
+let charts=[];let rawData=[];let rawEffets=[];let currentTab='overview';
+const MOIS=['jan.','fév.','mar.','avr.','mai','juin','juil.','août','sep.','oct.','nov.','déc.'];
+function formatDate(str){if(!str)return '--';const p=str.split('/');if(p.length<3)return str;return `${parseInt(p[0])} ${MOIS[parseInt(p[1])-1]} ${p[2]}`;}
+function toMin(str){if(!str)return null;const p=str.toString().trim().split(':');if(p.length<2)return null;const h=parseInt(p[0]);const m=parseInt(p[1]);if(isNaN(h)||isNaN(m))return null;return h*60+m;}
+function minToStr(m){if(m==null||isNaN(m))return '--';const h=Math.floor(m/60);const mn=Math.round(m%60);return h.toString().padStart(2,'0')+':'+mn.toString().padStart(2,'0');}
+function parseNum(v){if(v==null||v==='')return null;const n=parseFloat(v.toString().replace(',','.'));return isNaN(n)?null:n;}
+function avg(arr){const v=arr.filter(x=>x!=null&&!isNaN(x));return v.length?v.reduce((a,b)=>a+b,0)/v.length:null;}
+function stddev(arr){const v=arr.filter(x=>x!=null&&!isNaN(x));if(v.length<2)return null;const m=avg(v);return Math.round(Math.sqrt(v.reduce((s,x)=>s+(x-m)**2,0)/v.length));}
+function mkChart(id,cfg){const el=document.getElementById(id);if(!el)return;const c=new Chart(el,cfg);charts.push(c);}
+function getField(row,...keys){for(const k of keys){if(row[k]!==undefined&&row[k]!=='')return row[k];}return null;}
+function parseDateStr(str){if(!str)return null;const p=str.split('/');if(p.length<3)return null;return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));}
+function destroyCharts(){charts.forEach(c=>{try{c.destroy();}catch(e){}});charts=[];}
+const fmtH=v=>{if(v==null||typeof v!=='number')return null;const h=Math.floor(v/60);const m=v%60;return h.toString().padStart(2,'0')+'h'+m.toString().padStart(2,'0');};
+const tooltipH={mode:'index',intersect:false,callbacks:{label:ctx=>{const v=ctx.raw;if(v==null||typeof v!=='number')return null;if(ctx.dataset.yAxisID==='y2'||ctx.dataset.label==='Heure coucher'||ctx.dataset.label==='Heure prise')return ctx.dataset.label+': '+fmtH(v);return ctx.dataset.label+': '+v;}}};
+
+async function fetchSheet(sheetName){
+  const url=`/.netlify/functions/sheets?sheet=${encodeURIComponent(sheetName)}`;
+  const r=await fetch(url);
+  if(!r.ok){const e=await r.json();throw new Error(e.error?.message||'Erreur '+r.status);}
+  const d=await r.json();
+  if(!d.values||d.values.length<2)return[];
+  const[headers,...rows]=d.values;
+  return rows.map(row=>{const o={};headers.forEach((h,i)=>o[h.trim()]=row[i]||'');return o;});
+}
+
+async function startWithKey(){
+  document.getElementById('root').innerHTML='<div class="loading"><div class="spinner"></div><div class="load-text">Connexion à Google Sheets…</div></div>';
+  try{
+    [rawData,rawEffets]=await Promise.all([fetchSheet('DATA'),fetchSheet('Effets')]);
+    renderDashboard();
+  }catch(e){
+    document.getElementById('root').innerHTML=`<div style="padding:40px 24px;"><div class="error-box">Impossible de charger les données.<br><br>${e.message}<br><br><button onclick="startWithKey()" style="margin-top:12px;background:#378ADD;border:none;border-radius:8px;padding:10px 20px;color:#fff;cursor:pointer;font-size:13px;">Réessayer</button></div></div>`;
+  }
+}
+
+const filterState={prise:'all',dose:'all',traitement:'all',dateMin:null,dateMax:null};
+
+function getFiltered(){
+  return rawData.filter(r=>{
+    if(!r.jour||!r.jour.trim())return false;
+    if(filterState.prise!=='all'&&r.prise!==filterState.prise)return false;
+    if(filterState.dose!=='all'&&r.dose!==filterState.dose)return false;
+    if(filterState.traitement!=='all'&&r.traitement!==filterState.traitement)return false;
+    if(filterState.dateMin||filterState.dateMax){const d=parseDateStr(r.jour);if(!d)return false;if(filterState.dateMin&&d<filterState.dateMin)return false;if(filterState.dateMax&&d>filterState.dateMax)return false;}
+    return true;
+  });
+}
+function getFilteredEffets(rows){const dates=new Set(rows.map(r=>r.jour));return rawEffets.filter(e=>dates.has(e.date));}
+
+function resetFilters(){
+  filterState.prise='all';filterState.dose='all';filterState.traitement='all';filterState.dateMin=null;filterState.dateMax=null;
+  renderDashboard();
+}
+
+function renderDashboard(){
+  destroyCharts();
+  const rows=getFiltered();
+  const effets=getFilteredEffets(rows);
+  const allRows=rawData.filter(r=>r.jour&&r.jour.trim());
+  const doses=[...new Set(allRows.map(r=>r.dose).filter(Boolean))];
+  const traitements=[...new Set(allRows.map(r=>r.traitement).filter(Boolean))];
+  const n=rows.length;
+  const nPrise=rows.filter(r=>r.prise==='Oui').length;
+  const traitement=allRows.length?(allRows[allRows.length-1].traitement||'Méthylphénidate'):'Méthylphénidate';
+  const dose=allRows.length?(allRows[allRows.length-1].dose||'18mg'):'18mg';
+  const type=allRows.length?(allRows[allRows.length-1].type||'Générique'):'Générique';
+  const today=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const effVals=rows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))).filter(v=>v!=null);
+  const avgEff=effVals.length?Math.round(avg(effVals)*100):null;
+  const maxEff=effVals.length?Math.max(...effVals):null;
+  const minEff=effVals.length?Math.min(...effVals):null;
+  const bestIdx=effVals.length?effVals.indexOf(maxEff):-1;
+  const worstIdx=effVals.length?effVals.indexOf(minEff):-1;
+  const priseVals=rows.map(r=>toMin(r.heure_prise)).filter(v=>v!=null);
+  const avgPrise=avg(priseVals);
+  const minPrise=priseVals.length?Math.min(...priseVals):null;
+  const maxPrise=priseVals.length?Math.max(...priseVals):null;
+  const stdPrise=stddev(priseVals);
+  const coucherVals=rows.map(r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;}).filter(v=>v!=null);
+  const avgCoucher=avg(coucherVals);
+  const fcVals=rows.map(r=>parseNum(r.fq_repos_moy)).filter(v=>v!=null);
+  const avgFC=fcVals.length?Math.round(avg(fcVals)):null;
+  const minFC=fcVals.length?Math.min(...fcVals):null;
+  const maxFC=fcVals.length?Math.max(...fcVals):null;
+  const avgPlageMin=Math.round(avg(rows.map(r=>parseNum(r.plage_min)).filter(v=>v!=null)));
+  const avgPlageMax=Math.round(avg(rows.map(r=>parseNum(r.plage_max)).filter(v=>v!=null)));
+  const effetsPos=effets.filter(e=>e.type==='positif');
+  const effetsNeg=effets.filter(e=>e.type==='négatif'||e.type==='negatif');
+  const countByEffet=arr=>{const m={};arr.forEach(e=>{const k=e.effet||'';m[k]=(m[k]||0)+1;});return Object.entries(m).sort((a,b)=>b[1]-a[1]);};
+  const posCount=countByEffet(effetsPos);
+  const negCount=countByEffet(effetsNeg);
+  const maxPos=posCount.length?posCount[0][1]:1;
+  const maxNeg=negCount.length?negCount[0][1]:1;
+  const posColors=['#1D9E75','#2EBD8E','#5DCAA5','#9FE1CB','#C8EFE0'];
+  const negColors=['#D85A30','#E07050','#E89070','#F0B090','#F5C8A8'];
+  const shortDates=rows.map(r=>{const p=r.jour.split('/');return p.length>=2?p[0]+'/'+p[1]:r.jour;});
+  const effSerie=rows.map(r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});
+  const priseSerie=rows.map(r=>toMin(r.heure_prise));
+  const coucherSerie=rows.map(r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;});
+  const fcSerie=rows.map(r=>parseNum(r.fq_repos_moy));
+  const pMinSerie=rows.map(r=>parseNum(r.plage_min));
+  const pMaxSerie=rows.map(r=>parseNum(r.plage_max));
+  const reg=stdPrise==null?'--':stdPrise<=20?'Très régulier':stdPrise<=40?'Régulier':stdPrise<=60?'Irrégulier':'Très irrégulier';
+  const regColor=stdPrise!=null&&stdPrise<=40?'#1D9E75':'#D85A30';
+  const annotations={};
+  shortDates.forEach((l,i)=>{
+    const t=rows[i]?rows[i]['jour_travaillé']||rows[i].jour_travaille:null;
+    if(t==='0'||t===0){annotations['box'+i]={type:'box',xMin:i-0.5,xMax:i+0.5,backgroundColor:'rgba(255,255,255,0.07)',borderColor:'rgba(255,255,255,0.12)',borderWidth:1};}
+  });
+
+  const filtersHTML=`
+<div class="filters">
+  <div class="filters-top">
+    <div class="filters-label">Filtres</div>
+    <button class="reset-btn" onclick="resetFilters()">Réinitialiser</button>
+  </div>
+  <div class="filters-grid">
+    <div class="date-wrap"><div class="date-label">Du</div><input class="date-input" type="date" id="f_dateMin"/></div>
+    <div class="date-wrap"><div class="date-label">Au</div><input class="date-input" type="date" id="f_dateMax"/></div>
+    <select class="filter-pill" id="f_prise"><option value="all">Toutes les prises</option><option value="Oui">Avec prise</option><option value="Non">Sans prise</option></select>
+    <select class="filter-pill" id="f_dose"><option value="all">Toutes les doses</option>${doses.map(d=>`<option value="${d}">${d}</option>`).join('')}</select>
+    <select class="filter-pill" id="f_traitement"><option value="all">Tous les traitements</option>${traitements.map(t=>`<option value="${t}">${t}</option>`).join('')}</select>
+  </div>
+</div>`;
+
+  let pageContent='';
+
+  if(currentTab==='overview'){
+    pageContent=`
+${filtersHTML}
+<div class="sec">
+  <div class="slabel">Efficacité du traitement</div>
+  <div class="kcard g">
+    <div class="klabel">Efficacité moyenne</div>
+    <div class="kval g">${avgEff!=null?avgEff+'%':'--'}</div>
+    <div class="ksub">sur <span class="hi">${nPrise}</span> jour${nPrise>1?'s':''} avec prise</div>
+  </div>
+  <div class="grid2">
+    <div class="mini"><div class="mini-l">Meilleur jour</div><div class="mini-v" style="color:#1D9E75;font-size:15px;">${bestIdx>=0?formatDate(rows[bestIdx].jour):'--'}</div><div style="font-size:12px;color:#555;margin-top:4px;">${bestIdx>=0?Math.round(maxEff*100)+'%':''}</div></div>
+    <div class="mini"><div class="mini-l">Pire jour</div><div class="mini-v" style="color:#D85A30;font-size:15px;">${worstIdx>=0?formatDate(rows[worstIdx].jour):'--'}</div><div style="font-size:12px;color:#555;margin-top:4px;">${worstIdx>=0?Math.round(minEff*100)+'%':''}</div></div>
+  </div>
+  <div class="chart-card">
+    <div class="ct">Évolution de l'efficacité</div>
+    <div style="position:relative;width:100%;height:180px;"><canvas id="c_eff" role="img" aria-label="Courbe efficacité par jour">Efficacité par jour</canvas></div>
+  </div>
+</div>
+<div class="divider"></div>
+<div class="sec">
+  <div class="slabel">Heure de la prise</div>
+  <div class="kcard b">
+    <div class="klabel">Heure moyenne</div>
+    <div class="kval b">${minToStr(avgPrise)}</div>
+    <div class="ksub">min <span class="hi">${minToStr(minPrise)}</span> · max <span class="lo">${minToStr(maxPrise)}</span> · écart-type <span class="bl">${stdPrise!=null?stdPrise+' min':'--'}</span></div>
+  </div>
+  <div class="grid2">
+    <div class="mini"><div class="mini-l">Régularité</div><div class="mini-v" style="color:${regColor};font-size:15px;">${reg}</div></div>
+    <div class="mini"><div class="mini-l">Coucher moyen</div><div class="mini-v" style="color:#378ADD;font-size:15px;">${minToStr(avgCoucher)}</div></div>
+  </div>
+  <div class="chart-card">
+    <div class="ct">Suivi horaire prise & coucher</div>
+    <div class="legend"><span><span class="lsq" style="background:#378ADD;"></span>Heure prise</span><span><span class="lsq" style="background:#D85A30;"></span>Heure coucher</span><span><span class="lsq" style="background:#ffffff18;border:0.5px solid #ffffff33;"></span>Jour non-travaillé</span></div>
+    <div style="position:relative;width:100%;height:200px;"><canvas id="c_heure" role="img" aria-label="Suivi horaire prise et coucher">Heure prise et coucher</canvas></div>
+  </div>
+</div>
+<div class="divider"></div>
+<div class="sec">
+  <div class="slabel">Fréquence cardiaque</div>
+  <div class="kcard o">
+    <div class="klabel">FC moyenne au repos</div>
+    <div class="kval o">${avgFC!=null?avgFC:'--'} <span style="font-size:16px;color:#888;">bpm</span></div>
+    <div class="ksub">min <span class="hi">${minFC!=null?minFC:'--'}</span> · max <span class="lo">${maxFC!=null?maxFC:'--'}</span></div>
+  </div>
+  <div class="grid2">
+    <div class="mini"><div class="mini-l">Plage min moy.</div><div class="mini-v" style="color:#378ADD;">${!isNaN(avgPlageMin)?avgPlageMin+' bpm':'--'}</div></div>
+    <div class="mini"><div class="mini-l">Plage max moy.</div><div class="mini-v" style="color:#D85A30;">${!isNaN(avgPlageMax)?avgPlageMax+' bpm':'--'}</div></div>
+  </div>
+  <div class="chart-card">
+    <div class="legend"><span><span class="lsq" style="background:#378ADD;"></span>FC repos</span><span><span class="lsq" style="border:1px dashed #1D9E75;background:transparent;"></span>Plage min</span><span><span class="lsq" style="border:1px dashed #D85A30;background:transparent;"></span>Plage max</span></div>
+    <div style="position:relative;width:100%;height:180px;"><canvas id="c_fc" role="img" aria-label="FC repos et plages">FC repos et plages</canvas></div>
+  </div>
+</div>
+<div class="divider"></div>
+<div class="sec">
+  <div class="slabel">Effets du traitement</div>
+  <div class="occs">
+    <div class="occ"><div class="occ-v" style="color:#1D9E75;">${effetsPos.length}</div><div class="occ-l">Occurrences positives</div></div>
+    <div class="occ"><div class="occ-v" style="color:#D85A30;">${effetsNeg.length}</div><div class="occ-l">Occurrences négatives</div></div>
+  </div>
+  <div class="grid2">
+    <div class="chart-card">
+      <div class="ct" style="color:#1D9E75;">Impacts positifs</div>
+      ${posCount.length?posCount.map(([nom,cnt],i)=>`<div class="bar-row"><div class="bar-name">${nom}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/maxPos*100)}%;background:${posColors[i]||'#1D9E75'};"></div></div><div class="bar-v" style="color:${posColors[i]||'#1D9E75'};">${cnt}</div></div>`).join(''):'<div class="no-data">Aucune donnée</div>'}
+    </div>
+    <div class="chart-card">
+      <div class="ct" style="color:#D85A30;">Impacts négatifs</div>
+      ${negCount.length?negCount.map(([nom,cnt],i)=>`<div class="bar-row"><div class="bar-name">${nom}</div><div class="bar-track"><div class="bar-fill" style="width:${Math.round(cnt/maxNeg*100)}%;background:${negColors[i]||'#D85A30'};"></div></div><div class="bar-v" style="color:${negColors[i]||'#D85A30'};">${cnt}</div></div>`).join(''):'<div class="no-data">Aucune donnée</div>'}
+    </div>
+  </div>
+</div>`;
+  } else {
+    const scatterPriseEff=rows.map(r=>{const p=toMin(r.heure_prise);const e=parseNum(getField(r,'efficacite_auto-rapportee'));if(p==null||e==null)return null;const pct=Math.round(e*100);return{x:p,y:pct,eff:pct};}).filter(Boolean);
+    const scatterFCEff=rows.map(r=>{const f=parseNum(r.fq_repos_moy);const e=parseNum(getField(r,'efficacite_auto-rapportee'));return(f!=null&&e!=null)?{x:f,y:Math.round(e*100)}:null;}).filter(Boolean);
+    const travRows=rows.filter(r=>r['jour_travaillé']==='1'||r.jour_travaille==='1');
+    const nonTravRows=rows.filter(r=>r['jour_travaillé']==='0'||r.jour_travaille==='0');
+    const avgCoucherTrav=Math.round(avg(travRows.map(r=>parseNum(r.coucher_min)).filter(v=>v!=null&&v>0)));
+    const avgCoucherNonTrav=Math.round(avg(nonTravRows.map(r=>parseNum(r.coucher_min)).filter(v=>v!=null&&v>0)));
+    const avgEffTrav=travRows.length?Math.round(avg(travRows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))).filter(v=>v!=null))*100):null;
+    const avgEffNonTrav=nonTravRows.length?Math.round(avg(nonTravRows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))).filter(v=>v!=null))*100):null;
+    const effDist={};effVals.forEach(v=>{const k=Math.round(v*100/10)*10;effDist[k]=(effDist[k]||0)+1;});
+    const modeVal=Object.entries(effDist).sort((a,b)=>b[1]-a[1])[0]?.[0];
+    const distLabels=Object.keys(effDist).sort((a,b)=>a-b).map(k=>k+'%');
+    const distData=Object.keys(effDist).sort((a,b)=>a-b).map(k=>effDist[k]);
+    const distColors=Object.keys(effDist).sort((a,b)=>a-b).map(k=>{if(String(k)===String(modeVal))return '#D85A30bb';if(parseInt(k)>=avgEff)return '#1D9E75bb';return '#444';});
+    const sem1=rows.slice(0,Math.floor(rows.length/2));
+    const sem2=rows.slice(Math.floor(rows.length/2));
+    const avgEff1=sem1.length?Math.round(avg(sem1.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))).filter(v=>v!=null))*100):null;
+    const avgEff2=sem2.length?Math.round(avg(sem2.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))).filter(v=>v!=null))*100):null;
+    const tendance=avgEff1!=null&&avgEff2!=null?(avgEff2>avgEff1?'En hausse ↑':'En baisse ↓'):null;
+    const tendanceColor=tendance&&tendance.includes('↑')?'#1D9E75':'#D85A30';
+
+    pageContent=`
+<div class="disclaimer">Données auto-rapportées · n=${nPrise} jours avec prise · Les corrélations ne constituent pas des relations causales.</div>
+<div class="sec">
+  <div class="slabel">Tendance générale</div>
+  <div class="grid3">
+    <div class="mini"><div class="mini-l">Efficacité moy.</div><div class="mini-v" style="color:#1D9E75;">${avgEff!=null?avgEff+'%':'--'}</div></div>
+    <div class="mini"><div class="mini-l">Tendance</div><div class="mini-v" style="color:${tendanceColor};font-size:16px;">${tendance||'--'}</div></div>
+    <div class="mini"><div class="mini-l">Régularité prise</div><div class="mini-v" style="color:${regColor};font-size:15px;">${reg}</div></div>
+  </div>
+</div>
+<div class="divider"></div>
+<div class="sec">
+  <div class="slabel">Corrélations</div>
+  <div class="grid2">
+    <div class="chart-card">
+      <div class="ct">Heure de prise → efficacité</div>
+      <div style="position:relative;width:100%;height:220px;"><canvas id="sc1" role="img" aria-label="Nuage de points heure prise vs efficacité">Heure prise vs efficacité</canvas></div>
+      <div class="legend" style="margin-top:10px;">
+        <span><span class="lsq" style="background:#085041;"></span>≥50%</span>
+        <span><span class="lsq" style="background:#1D9E75;"></span>≥40%</span>
+        <span><span class="lsq" style="background:#378ADD;"></span>≥30%</span>
+        <span><span class="lsq" style="background:#D85A30;"></span>&lt;30%</span>
+      </div>
+      <div class="insight neu">Tendance exploratoire — données insuffisantes pour conclure.</div>
+    </div>
+    <div class="chart-card">
+      <div class="ct">Heure de prise & heure de coucher dans le temps</div>
+      <div class="legend"><span><span class="lsq" style="background:#378ADD;"></span>Heure prise</span><span><span class="lsq" style="border:1px dashed #D85A30;background:transparent;"></span>Heure coucher</span></div>
+      <div style="position:relative;width:100%;height:220px;"><canvas id="sc2" role="img" aria-label="Double courbe heure prise et coucher">Heure prise et coucher</canvas></div>
+      <div class="insight neu">Les nuits tardives semblent davantage liées aux jours non-travaillés qu'à l'heure de prise.</div>
+    </div>
+    <div class="chart-card">
+      <div class="ct">FC au repos → efficacité</div>
+      <div style="position:relative;width:100%;height:220px;"><canvas id="sc3" role="img" aria-label="Nuage de points FC repos vs efficacité">FC repos vs efficacité</canvas></div>
+      <div class="insight neu">Pas de relation évidente entre FC au repos et efficacité ressentie.</div>
+    </div>
+    <div class="chart-card">
+      <div class="ct">Distribution de l'efficacité</div>
+      <div style="position:relative;width:100%;height:220px;"><canvas id="dist1" role="img" aria-label="Distribution des scores d'efficacité">Distribution efficacité</canvas></div>
+      <div class="legend" style="margin-top:10px;">
+        <span><span class="lsq" style="background:#1D9E75bb;"></span>Au-dessus de la moyenne</span>
+        <span><span class="lsq" style="background:#D85A30bb;"></span>Plus fréquent</span>
+        <span><span class="lsq" style="background:#444;"></span>En dessous</span>
+      </div>
+      <div class="insight pos">Efficacité concentrée entre 20% et 40%.</div>
+    </div>
+  </div>
+</div>
+<div class="divider"></div>
+<div class="sec">
+  <div class="slabel">Jours travaillés vs non-travaillés</div>
+  <div class="grid2">
+    <div class="chart-card">
+      <div class="ct">Comparaison — efficacité & heure de coucher</div>
+      <div class="legend"><span><span class="lsq" style="background:#378ADDaa;"></span>Travaillé</span><span><span class="lsq" style="background:#888780aa;"></span>Non-travaillé</span></div>
+      <div style="position:relative;width:100%;height:220px;"><canvas id="comp1" role="img" aria-label="Barres comparaison travaillé vs non travaillé">Comparaison travaillé/non-travaillé</canvas></div>
+      <div class="insight warn">Coucher ${Math.abs((avgCoucherNonTrav||0)-(avgCoucherTrav||0))} min plus ${(avgCoucherNonTrav||0)>(avgCoucherTrav||0)?'tardif':'tôt'} les jours non-travaillés.</div>
+    </div>
+    <div class="chart-card">
+      <div class="ct">Radar — profil travaillé vs non-travaillé</div>
+      <div class="legend"><span><span class="lsq" style="background:#378ADD;"></span>Travaillé</span><span><span class="lsq" style="background:#888;"></span>Non-travaillé</span></div>
+      <div style="position:relative;width:100%;height:220px;"><canvas id="comp2" role="img" aria-label="Radar comparaison profil travaillé vs non travaillé">Radar travaillé/non-travaillé</canvas></div>
+    </div>
+  </div>
+</div>
+<div class="sec">
+  <div class="slabel">Limites de l'analyse</div>
+  <div class="chart-card" style="background:#2a1f10;">
+    <div style="font-size:13px;color:#FAC775;line-height:2;">
+      · Données auto-rapportées — biais de perception possible<br>
+      · n=${nPrise} jours — aucune corrélation statistiquement significative<br>
+      · Pas de groupe contrôle sans traitement<br>
+      · Efficacité influencée par des facteurs externes non mesurés<br>
+      · Une seule dose testée — comparaison inter-doses à venir
+    </div>
+  </div>
+</div>`;
+
+    setTimeout(()=>{
+      const effColor=v=>{if(v>=50)return '#085041';if(v>=40)return '#1D9E75';if(v>=30)return '#378ADD';return '#D85A30';};
+      mkChart('sc1',{type:'scatter',data:{datasets:[{data:scatterPriseEff.map(p=>({x:p.x,y:p.y})),backgroundColor:scatterPriseEff.map(p=>effColor(p.eff)),pointRadius:7,pointHoverRadius:9}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'nearest',intersect:false,callbacks:{label:ctx=>`${fmtH(ctx.raw.x)} → ${ctx.raw.y}%`}}},scales:{x:{ticks:{color:tc,font:{size:10},callback:fmtH,maxTicksLimit:6},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:v=>v+'%',maxTicksLimit:6},grid:{color:gc},min:0,max:70}}}});
+
+      mkChart('sc2',{type:'line',data:{labels:shortDates,datasets:[
+        {label:'Heure prise',data:priseSerie,borderColor:'#378ADD',tension:0.4,pointRadius:3,borderWidth:2,fill:false,spanGaps:false,yAxisID:'y'},
+        {label:'Heure coucher',data:coucherSerie,borderColor:'#D85A30',tension:0.4,pointRadius:3,borderWidth:2,fill:false,spanGaps:false,borderDash:[5,3],yAxisID:'y2'}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tooltipH},scales:{
+        x:{ticks:{color:tc,font:{size:10},maxTicksLimit:7,maxRotation:0},grid:{color:gc}},
+        y:{ticks:{color:tc,font:{size:10},callback:fmtH,maxTicksLimit:5},grid:{color:gc},min:500,max:780},
+        y2:{position:'right',ticks:{color:tc,font:{size:10},callback:fmtH,maxTicksLimit:5},grid:{display:false},min:0,max:220}
+      }}});
+
+      mkChart('sc3',{type:'scatter',data:{datasets:[{data:scatterFCEff,backgroundColor:'#EF9F2799',pointRadius:7,pointHoverRadius:9}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'nearest',intersect:false,callbacks:{label:ctx=>`${ctx.raw.x} bpm → ${ctx.raw.y}%`}}},scales:{x:{ticks:{color:tc,font:{size:10},callback:v=>v+' bpm',maxTicksLimit:5},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:v=>v+'%',maxTicksLimit:5},grid:{color:gc},min:0,max:70}}}});
+
+      mkChart('dist1',{type:'bar',data:{labels:distLabels,datasets:[{data:distData,backgroundColor:distColors,borderWidth:0,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},annotation:{annotations:{avg:{type:'line',xMin:-0.5,xMax:distLabels.length-0.5,yMin:0,yMax:0,borderColor:'transparent',label:{display:true,content:'moy.',position:'end',color:'#1D9E75',font:{size:10}}}}}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},stepSize:1,maxTicksLimit:6},grid:{color:gc}}}}});
+
+      mkChart('comp1',{type:'bar',data:{labels:['Efficacité moy.','Heure coucher moy.'],datasets:[
+        {label:'Travaillé',data:[avgEffTrav,avgCoucherTrav],backgroundColor:'#378ADDaa',borderRadius:6,borderWidth:0},
+        {label:'Non-travaillé',data:[avgEffNonTrav,avgCoucherNonTrav],backgroundColor:'#888780aa',borderRadius:6,borderWidth:0}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>{const v=ctx.raw;if(ctx.dataIndex===1)return ctx.dataset.label+': '+fmtH(v);return ctx.dataset.label+': '+v+'%';}}}},scales:{x:{ticks:{color:tc,font:{size:11}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},maxTicksLimit:5},grid:{color:gc}}}}});
+
+      const fcAvgTrav=Math.round(avg(travRows.map(r=>parseNum(r.fq_repos_moy)).filter(v=>v!=null)));
+      const fcAvgNonTrav=Math.round(avg(nonTravRows.map(r=>parseNum(r.fq_repos_moy)).filter(v=>v!=null)));
+      const stdTrav=stddev(travRows.map(r=>toMin(r.heure_prise)).filter(v=>v!=null))||0;
+      const stdNonTrav=stddev(nonTravRows.map(r=>toMin(r.heure_prise)).filter(v=>v!=null))||0;
+      mkChart('comp2',{type:'radar',data:{labels:['Efficacité','Régularité prise','Coucher tardif','FC repos'],datasets:[
+        {label:'Travaillé',data:[avgEffTrav||0,Math.max(0,100-stdTrav),Math.round((avgCoucherTrav||0)/2.2),fcAvgTrav||0],borderColor:'#378ADD',backgroundColor:'#378ADD22',pointBackgroundColor:'#378ADD',pointRadius:4,borderWidth:2},
+        {label:'Non-travaillé',data:[avgEffNonTrav||0,Math.max(0,100-stdNonTrav),Math.round((avgCoucherNonTrav||0)/2.2),fcAvgNonTrav||0],borderColor:'#888780',backgroundColor:'#88878022',pointBackgroundColor:'#888780',pointRadius:4,borderWidth:2}
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'nearest',intersect:false}},scales:{r:{ticks:{display:false,maxTicksLimit:4},grid:{color:gc},angleLines:{color:gc},pointLabels:{color:tc,font:{size:11}}}}}});
+    },100);
+  }
+
+  document.getElementById('root').innerHTML=`
+<div class="app">
+  <div class="cover">
+    <div class="cover-inner">
+      <div>
+        <div class="mol">CH₃ · C₁₄H₁₉NO₂</div>
+        <div class="ctitle">Suivi traitement TDAH</div>
+        <div class="csub">${traitement} · ${type} · ${dose}</div>
+        <div class="ckpis">
+          <div class="ckpi"><div class="ckpi-v">${allRows.length}</div><div class="ckpi-l">Jours de suivi</div></div>
+          <div class="ckpi"><div class="ckpi-v">${allRows.filter(r=>r.prise==='Oui').length}</div><div class="ckpi-l">Jours avec prise</div></div>
+        </div>
+        <div class="cdate">${today}</div>
+      </div>
+      <div class="cover-right">
+        <button class="refresh-btn" onclick="location.reload()">↺ Actualiser</button>
+      </div>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab ${currentTab==='overview'?'active':''}" onclick="switchTab('overview')">Chiffres clés</button>
+    <button class="tab ${currentTab==='analyses'?'active':''}" onclick="switchTab('analyses')">Analyses</button>
+  </div>
+  <div id="page-content">${pageContent}</div>
+</div>`;
+
+  document.getElementById('f_prise').value=filterState.prise;
+  document.getElementById('f_dose').value=filterState.dose;
+  document.getElementById('f_traitement').value=filterState.traitement;
+  document.getElementById('f_prise').addEventListener('change',e=>{filterState.prise=e.target.value;renderDashboard();});
+  document.getElementById('f_dose').addEventListener('change',e=>{filterState.dose=e.target.value;renderDashboard();});
+  document.getElementById('f_traitement').addEventListener('change',e=>{filterState.traitement=e.target.value;renderDashboard();});
+  document.getElementById('f_dateMin').addEventListener('change',e=>{filterState.dateMin=e.target.value?new Date(e.target.value):null;renderDashboard();});
+  document.getElementById('f_dateMax').addEventListener('change',e=>{filterState.dateMax=e.target.value?new Date(e.target.value):null;renderDashboard();});
+
+  if(currentTab==='overview'){
+    mkChart('c_eff',{type:'line',data:{labels:shortDates,datasets:[
+      {data:effSerie,borderColor:'#1D9E75',backgroundColor:'rgba(29,158,117,0.08)',fill:true,tension:0.4,pointRadius:4,pointBackgroundColor:'#1D9E75',borderWidth:2,spanGaps:false},
+      {data:Array(rows.length).fill(avgEff),borderColor:'#1D9E7555',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false,label:'Moyenne'}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>{if(ctx.dataset.label==='Moyenne')return'Moyenne: '+ctx.raw+'%';return ctx.raw!=null?ctx.raw+'%':null;}}}},scales:{x:{ticks:{color:tc,font:{size:10},maxTicksLimit:8,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:v=>v+'%',maxTicksLimit:6},grid:{color:gc},min:0,max:70}}}});
+
+    mkChart('c_heure',{type:'line',data:{labels:shortDates,datasets:[
+      {label:'Heure prise',data:priseSerie,borderColor:'#378ADD',tension:0.4,pointRadius:4,borderWidth:2,fill:false,spanGaps:false,yAxisID:'y'},
+      {label:'Heure coucher',data:coucherSerie,borderColor:'#D85A30',tension:0.4,pointRadius:4,borderWidth:2,fill:false,spanGaps:false,yAxisID:'y2'}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tooltipH,annotation:{annotations}},scales:{
+      x:{ticks:{color:tc,font:{size:10},maxTicksLimit:8,maxRotation:0},grid:{color:gc}},
+      y:{ticks:{color:tc,font:{size:10},padding:8,callback:fmtH,maxTicksLimit:5},grid:{color:gc},min:500,max:780},
+      y2:{position:'right',ticks:{color:tc,font:{size:10},padding:8,callback:fmtH,maxTicksLimit:5},grid:{display:false},min:0,max:220}
+    }}});
+
+    mkChart('c_fc',{type:'line',data:{labels:shortDates,datasets:[
+      {label:'FC repos',data:fcSerie,borderColor:'#378ADD',tension:0.4,pointRadius:3,borderWidth:2,fill:false},
+      {label:'Plage min',data:pMinSerie,borderColor:'#1D9E75',tension:0.4,pointRadius:0,borderWidth:1.5,borderDash:[4,3],fill:false},
+      {label:'Plage max',data:pMaxSerie,borderColor:'#D85A30',tension:0.4,pointRadius:0,borderWidth:1.5,borderDash:[4,3],fill:false}
+    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>ctx.raw!=null?ctx.dataset.label+': '+ctx.raw+' bpm':null}}},scales:{x:{ticks:{color:tc,font:{size:10},maxTicksLimit:8,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},padding:8,callback:v=>v+' bpm',maxTicksLimit:6},grid:{color:gc}}}}});
+  }
+}
+
+function switchTab(tab){currentTab=tab;renderDashboard();}
+startWithKey();
+</script>
+</body>
+</html>

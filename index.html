@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Suivi traitement TDAH</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap');
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -375,11 +376,18 @@ function init(rawData,rawEffets,apiKey){
       {data:Array(rows.length).fill(avgEff),borderColor:'#1D9E7555',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:9},maxTicksLimit:7,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9},callback:v=>v+'%'},grid:{color:gc},min:0,max:70}}}});
 
+const annotations={};
+shortDates.forEach((l,i)=>{
+  const t=rows[i]?rows[i]['jour_travaillé']||rows[i].jour_travaille:null;
+  if(t==='0'||t===0){
+    annotations['box'+i]={type:'box',xMin:i-0.5,xMax:i+0.5,backgroundColor:'rgba(255,255,255,0.07)',borderColor:'rgba(255,255,255,0.12)',borderWidth:1};
+  }
+});
+
 mkChart('c_heure',{type:'line',data:{labels:shortDates,datasets:[
   {data:priseSerie,borderColor:'#378ADD',tension:0.4,pointRadius:3,pointBackgroundColor:'#378ADD',borderWidth:2,fill:false,spanGaps:false,yAxisID:'y'},
-  {data:coucherSerie,borderColor:'#D85A30',tension:0.4,pointRadius:3,pointBackgroundColor:'#D85A30',borderWidth:2,fill:false,spanGaps:false,yAxisID:'y2'},
-  {data:nonTravSerie,borderColor:'transparent',backgroundColor:'transparent',pointRadius:nonTravSerie.map(v=>v!=null?7:0),pointBackgroundColor:'#7F77DD',pointBorderColor:'transparent',showLine:false,yAxisID:'y2'}
-]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.raw;if(v==null)return null;const h=Math.floor(v/60);const m=v%60;return h+'h'+(m<10?'0':'')+m;}}}},scales:{
+  {data:coucherSerie,borderColor:'#D85A30',tension:0.4,pointRadius:3,pointBackgroundColor:'#D85A30',borderWidth:2,fill:false,spanGaps:false,yAxisID:'y2'}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.raw;if(v==null||typeof v!=='number')return null;const h=Math.floor(v/60);const m=v%60;return h+'h'+(m<10?'0':'')+m;}}},annotation:{annotations}},scales:{
   x:{ticks:{color:tc,font:{size:9},maxTicksLimit:7,maxRotation:0},grid:{color:gc}},
   y:{ticks:{color:tc,font:{size:9},padding:8,callback:v=>{const h=Math.floor(v/60);const m=v%60;return h+'h'+(m<10?'0':'')+m;}},grid:{color:gc},min:500,max:780},
   y2:{position:'right',ticks:{color:tc,font:{size:9},padding:8,callback:v=>{const h=Math.floor(v/60);const m=v%60;return h+'h'+(m<10?'0':'')+m;}},grid:{display:false},min:0,max:220}

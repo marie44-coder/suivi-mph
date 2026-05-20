@@ -375,15 +375,15 @@ function init(rawData,rawEffets,apiKey){
       {data:Array(rows.length).fill(avgEff),borderColor:'#1D9E7555',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:9},maxTicksLimit:7,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9},callback:v=>v+'%'},grid:{color:gc},min:0,max:70}}}});
 
-    mkChart('c_heure',{type:'line',data:{labels:shortDates,datasets:[
-      {data:priseSerie,borderColor:'#378ADD',tension:0.4,pointRadius:3,pointBackgroundColor:'#378ADD',borderWidth:2,fill:false,spanGaps:false,yAxisID:'y'},
-      {data:coucherSerie,borderColor:'#D85A30',tension:0.4,pointRadius:3,pointBackgroundColor:'#D85A30',borderWidth:2,fill:false,spanGaps:false,yAxisID:'y2'},
-      {data:nonTravSerie,borderColor:'transparent',backgroundColor:'transparent',pointRadius:8,pointBackgroundColor:'#7F77DD',pointBorderColor:'#7F77DD',showLine:false,yAxisID:'y2'}
-    ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{
-      x:{ticks:{color:tc,font:{size:9},maxTicksLimit:7,maxRotation:0},grid:{color:gc}},
-      y:{ticks:{color:tc,font:{size:9},padding:8,callback:v=>{const h=Math.floor(v/60);const m=v%60;return h+'h'+(m<10?'0':'')+m;}},grid:{color:gc},min:500,max:780},
-      y2:{position:'right',ticks:{color:tc,font:{size:9},padding:8,callback:v=>{const h=Math.floor(v/60);const m=v%60;return h+'h'+(m<10?'0':'')+m;}},grid:{display:false},min:0,max:220}
-    }}});
+mkChart('c_heure',{type:'line',data:{labels:shortDates,datasets:[
+  {data:priseSerie,borderColor:'#378ADD',tension:0.4,pointRadius:3,pointBackgroundColor:'#378ADD',borderWidth:2,fill:false,spanGaps:false,yAxisID:'y'},
+  {data:coucherSerie,borderColor:'#D85A30',tension:0.4,pointRadius:3,pointBackgroundColor:'#D85A30',borderWidth:2,fill:false,spanGaps:false,yAxisID:'y2'},
+  {data:nonTravSerie,borderColor:'transparent',backgroundColor:'transparent',pointRadius:nonTravSerie.map(v=>v!=null?7:0),pointBackgroundColor:'#7F77DD',pointBorderColor:'transparent',showLine:false,yAxisID:'y2'}
+]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const v=ctx.raw;if(v==null)return null;const h=Math.floor(v/60);const m=v%60;return h+'h'+(m<10?'0':'')+m;}}}},scales:{
+  x:{ticks:{color:tc,font:{size:9},maxTicksLimit:7,maxRotation:0},grid:{color:gc}},
+  y:{ticks:{color:tc,font:{size:9},padding:8,callback:v=>{const h=Math.floor(v/60);const m=v%60;return h+'h'+(m<10?'0':'')+m;}},grid:{color:gc},min:500,max:780},
+  y2:{position:'right',ticks:{color:tc,font:{size:9},padding:8,callback:v=>{const h=Math.floor(v/60);const m=v%60;return h+'h'+(m<10?'0':'')+m;}},grid:{display:false},min:0,max:220}
+}}});
 
     mkChart('c_fc',{type:'line',data:{labels:shortDates,datasets:[
       {data:fcSerie,borderColor:'#378ADD',tension:0.4,pointRadius:2,borderWidth:2,fill:false},

@@ -217,8 +217,8 @@ function init(rawData,rawEffets,apiKey){
     const traitement=rows.length?(rows[rows.length-1].traitement||'Méthylphénidate'):'Méthylphénidate';
     const dose=rows.length?(rows[rows.length-1].dose||'18mg'):'18mg';
     const type=rows.length?(rows[rows.length-1].type||'Générique'):'Générique';
-    const bestIdx=effVals.length?rows.findIndex(r=>parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto-rapportee'))===Math.max(...effVals)):-1;
-    const worstIdx=effVals.length?rows.findIndex(r=>parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto-rapportee'))===Math.min(...effVals)):-1;
+    const bestIdx=effVals.length?rows.findIndex(r=>parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto-rapportee')?.replace(',','.'))===Math.max(...effVals)):-1;
+    const worstIdx=effVals.length?rows.findIndex(r=>parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto-rapportee')?.replace(',','.'))===Math.min(...effVals)):-1;
     const reg=stdPrise==null?'--':stdPrise<=20?'Très régulier':stdPrise<=40?'Régulier':stdPrise<=60?'Irrégulier':'Très irrégulier';
     const regColor=stdPrise!=null&&stdPrise<=40?'#1D9E75':'#D85A30';
 

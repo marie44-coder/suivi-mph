@@ -205,7 +205,7 @@ function init(rawData,rawEffets,apiKey){
     const maxNeg=negCount.length?negCount[0][1]:1;
 
     const shortDates=rows.map(r=>{const p=r.jour.split('/');return p.length>=2?p[0]+'/'+p[1]:r.jour;});
-    const effSerie=rows.map(r=>{const v=parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto_rapportee'));return isNaN(v)?null:Math.round(v*100);});
+    const effSerie=rows.map(r=>{const v=parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto-rapportee'));return isNaN(v)?null:Math.round(v*100);});
     const priseSerie=rows.map(r=>toMin(r.heure_prise));
     const coucherSerie=rows.map(r=>{const v=parseFloat(r.coucher_min);return(!isNaN(v)&&v>0)?v:null;});
     const nonTravSerie=rows.map(r=>{const v=parseFloat(r.coucher_min);const t=r['jour_travaillé']||r.jour_travaille;return(t==='0'||t===0)&&!isNaN(v)&&v>0?v:null;});
@@ -217,8 +217,8 @@ function init(rawData,rawEffets,apiKey){
     const traitement=rows.length?(rows[rows.length-1].traitement||'Méthylphénidate'):'Méthylphénidate';
     const dose=rows.length?(rows[rows.length-1].dose||'18mg'):'18mg';
     const type=rows.length?(rows[rows.length-1].type||'Générique'):'Générique';
-    const bestIdx=effVals.length?rows.findIndex(r=>parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto_rapportee'))===Math.max(...effVals)):-1;
-    const worstIdx=effVals.length?rows.findIndex(r=>parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto_rapportee'))===Math.min(...effVals)):-1;
+    const bestIdx=effVals.length?rows.findIndex(r=>parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto-rapportee'))===Math.max(...effVals)):-1;
+    const worstIdx=effVals.length?rows.findIndex(r=>parseFloat(getField(r,'efficacite_auto-rapportee','efficacite_auto-rapportee'))===Math.min(...effVals)):-1;
     const reg=stdPrise==null?'--':stdPrise<=20?'Très régulier':stdPrise<=40?'Régulier':stdPrise<=60?'Irrégulier':'Très irrégulier';
     const regColor=stdPrise!=null&&stdPrise<=40?'#1D9E75':'#D85A30';
 

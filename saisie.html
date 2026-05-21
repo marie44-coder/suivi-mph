@@ -67,7 +67,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 <div class="form">
 
   <div class="card">
-    <div class="question">Tu prends toujours du <span>Méthylphénidate Générique</span> ?</div>
+    <div class="question">Prends-tu toujours du <span>Méthylphénidate Générique</span> depuis hier ?</div>
     <div class="btn-group cols2">
       <div class="btn-opt selected green" id="traitement-oui" onclick="selectTraitement(true)">Oui, toujours</div>
       <div class="btn-opt" id="traitement-non" onclick="selectTraitement(false)">Non, changement</div>
@@ -75,7 +75,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
   </div>
 
   <div class="card">
-    <div class="question">Tu es toujours à <span>18mg</span> ?</div>
+    <div class="question">Etais-tu toujours à <span>18mg</span> hier ?</div>
     <div class="btn-group cols2" id="dose-group">
       <div class="btn-opt selected green" onclick="selectDose(this,'18mg')">18mg — oui</div>
       <div class="btn-opt" onclick="selectDose(this,'27mg')">27mg</div>
@@ -85,7 +85,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
   </div>
 
   <div class="card">
-    <div class="question">As-tu pris ton traitement aujourd'hui ?</div>
+    <div class="question">As-tu pris ton traitement hier ?</div>
     <div class="btn-group cols2">
       <div class="btn-opt selected green" id="prise-oui" onclick="selectPrise('Oui')">Oui, pris</div>
       <div class="btn-opt" id="prise-non" onclick="selectPrise('Non')">Non, pas pris</div>
@@ -94,18 +94,18 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
 
   <div id="prise-details">
     <div class="card">
-      <div class="question">À quelle heure as-tu pris ton traitement ?</div>
+      <div class="question">À quelle heure as-tu pris ton traitement hier ?</div>
       <input type="time" id="heure_prise" placeholder="10:00"/>
     </div>
 
     <div class="card">
-      <div class="question">Quels effets as-tu ressentis aujourd'hui ?</div>
+      <div class="question">Quels effets as-tu ressentis hier ?</div>
       <div class="sublabel">Coche tout ce qui s'applique</div>
       <div class="checkbox-grid">
         <label class="checkbox-item" onclick="toggleEffet(this)">
           <input type="checkbox" value="Concentration"/>
           <div class="checkbox-box"><span class="checkbox-check">✓</span></div>
-          <span class="checkbox-label">Concentration</span>
+          <span class="checkbox-label">Hausse de concentration</span>
         </label>
         <label class="checkbox-item" onclick="toggleEffet(this)">
           <input type="checkbox" value="Attention"/>

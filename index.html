@@ -174,8 +174,8 @@ function renderDashboard(){
   const negCount=countByEffet(effetsNeg);
   const maxPos=posCount.length?posCount[0][1]:1;
   const maxNeg=negCount.length?negCount[0][1]:1;
-  const posColors=['#085041','#1D9E75','#3DB88A','#7DD4B0','#B0E8D0'];
-  const negColors=['#991800','#D85A30','#E07A55','#EDAA88','#F5CCAA'];
+  const posColors=['#1e9e75','#5ecaa5','#9fe1cb'];
+  const negColors=['#da5a32','#f19b7b','#f5c4b3'];
   const shortDates=rows.map(r=>{const p=r.jour.split('/');return p.length>=2?p[0]+'/'+p[1]:r.jour;});
   const effSerie=rows.map(r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});
   const priseSerie=rows.map(r=>toMin(r.heure_prise));

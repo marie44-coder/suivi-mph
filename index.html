@@ -14,40 +14,45 @@ body{background:#0f1117;color:#fff;font-family:'DM Sans',sans-serif;min-height:1
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;height:300px;gap:12px;}
 .spinner{width:32px;height:32px;border:2px solid #ffffff15;border-top:2px solid #378ADD;border-radius:50%;animation:spin 0.8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.load-text{font-size:13px;color:#555;}
+.load-text{font-size:13px;color:#888;}
 .error-box{background:#2a1010;border:0.5px solid #D85A3044;border-radius:12px;padding:16px;margin:20px 0;font-size:13px;color:#F09595;line-height:1.6;}
 .cover{background:#0d1629;padding:20px 24px 18px;border-radius:0 0 20px 20px;margin-bottom:24px;}
 .cover-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
-.mol{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:#378ADD55;margin-bottom:5px;}
+.mol{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:#378ADD99;margin-bottom:5px;}
 .ctitle{font-size:26px;font-weight:500;color:#fff;margin-bottom:3px;}
-.csub{font-size:13px;color:#378ADD55;}
+.csub{font-size:13px;color:#378ADDcc;}
 .cover-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px;}
 @media(max-width:600px){.cover-kpis{grid-template-columns:1fr 1fr;}}
-.ckpi{background:#0C447C22;border:0.5px solid #378ADD22;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;}
+.ckpi{background:#0C447C22;border:0.5px solid #378ADD33;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;}
 .ckpi-v{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:#85B7EB;flex-shrink:0;}
-.ckpi-l{font-size:11px;color:#378ADD55;line-height:1.3;}
-.cdate{font-size:11px;color:#378ADD33;text-align:center;}
-.refresh-btn{background:transparent;border:0.5px solid #378ADD33;border-radius:8px;padding:7px 12px;font-size:12px;color:#378ADD66;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.ckpi-l{font-size:11px;color:#378ADDcc;line-height:1.3;}
+.cdate{font-size:11px;color:#378ADD66;text-align:center;}
+.refresh-btn{background:transparent;border:0.5px solid #378ADD44;border-radius:8px;padding:7px 12px;font-size:12px;color:#378ADD99;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;}
 .refresh-btn:hover{border-color:#378ADD;color:#378ADD;}
-.tabs{display:flex;gap:4px;margin-bottom:20px;background:#161920;border-radius:12px;padding:4px;}
-.tab{flex:1;text-align:center;padding:12px 20px;font-size:14px;color:#666;cursor:pointer;border-radius:10px;transition:all 0.2s;border:none;background:transparent;font-family:'DM Sans',sans-serif;}
-.tab.active{background:#1e2235;color:#fff;}
-.tab:hover:not(.active){color:#aaa;}
-.reset-btn{background:transparent;border:0.5px solid #ffffff15;border-radius:8px;padding:8px 16px;font-size:12px;color:#666;cursor:pointer;font-family:'DM Sans',sans-serif;}
-.reset-btn:hover{border-color:#aaa;color:#aaa;}
-.filters{background:#161920;border:0.5px solid #ffffff08;border-radius:12px;padding:16px 18px;margin-bottom:20px;}
+.tabs{display:flex;gap:6px;margin-bottom:20px;}
+.tab{flex:1;text-align:center;padding:11px 20px;font-size:14px;color:#ccc;cursor:pointer;border-radius:10px;border:1.5px solid #378ADD33;background:transparent;font-family:'DM Sans',sans-serif;transition:all 0.2s;}
+.tab.active{background:#1e2235;color:#fff;border-color:#378ADD55;}
+.tab:hover:not(.active){color:#eee;border-color:#378ADD44;}
+.reset-btn{background:transparent;border:0.5px solid #ffffff25;border-radius:8px;padding:8px 16px;font-size:12px;color:#aaa;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.reset-btn:hover{border-color:#aaa;color:#ddd;}
+.filters{background:#161920;border:0.5px solid #ffffff10;border-radius:12px;padding:16px 18px;margin-bottom:20px;}
 .filters-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.filters-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.1em;}
-.filters-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;}
-.filter-pill{background:#1e2235;border:0.5px solid #ffffff0f;border-radius:8px;padding:9px 13px;font-size:13px;color:#aaa;width:100%;cursor:pointer;appearance:none;-webkit-appearance:none;outline:none;}
+.filters-label{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.1em;}
+.filters-dates{display:flex;gap:12px;margin-bottom:14px;}
+.filters-pills{display:flex;gap:0;border-bottom:1px solid #ffffff10;}
 .date-wrap{display:flex;flex-direction:column;gap:4px;}
-.date-label{font-size:11px;color:#444;}
-.date-input{background:#1e2235;border:0.5px solid #ffffff0f;border-radius:8px;padding:8px 12px;font-size:13px;color:#aaa;width:100%;outline:none;font-family:'DM Sans',sans-serif;}
+.date-label{font-size:11px;color:#777;}
+.date-input{background:#1e2235;border:0.5px solid #ffffff18;border-radius:8px;padding:8px 12px;font-size:13px;color:#ccc;width:160px;outline:none;font-family:'DM Sans',sans-serif;}
+.filter-pill{background:transparent;border:none;border-bottom:2px solid #378ADD33;padding:9px 18px;font-size:13px;color:#ccc;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px;margin-bottom:-1px;transition:all 0.15s;}
+.filter-pill:hover{color:#eee;}
+.filter-pill.active{color:#85B7EB;border-bottom:2px solid #85B7EB;}
+.filter-pill .arr{font-size:9px;color:#555;margin-top:1px;}
+.filter-pill.active .arr{color:#85B7EB;}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
 @media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr;}}
 .sec{margin-bottom:28px;}
-.slabel{font-size:12px;font-weight:500;color:#555;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;}
+.slabel{font-size:12px;font-weight:500;color:#777;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:12px;}
 .kcard{border-radius:12px;padding:16px 18px;margin-bottom:14px;}
 .kcard.g{background:#04342C;border-left:3px solid #1D9E75;}
 .kcard.b{background:#042C53;border-left:3px solid #378ADD;}
@@ -55,14 +60,14 @@ body{background:#0f1117;color:#fff;font-family:'DM Sans',sans-serif;min-height:1
 .klabel{font-size:12px;color:#aaa;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
 .kval{font-family:'DM Mono',monospace;font-size:32px;font-weight:500;}
 .kval.g{color:#1D9E75;}.kval.b{color:#378ADD;}.kval.o{color:#D85A30;}
-.ksub{font-size:12px;color:#555;margin-top:5px;}
+.ksub{font-size:12px;color:#777;margin-top:5px;}
 .ksub .hi{color:#1D9E75;}.ksub .lo{color:#D85A30;}.ksub .bl{color:#378ADD;}
 .mini{background:#1e2235;border-radius:12px;padding:14px 16px;}
-.mini-l{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
+.mini-l{font-size:11px;color:#777;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
 .mini-v{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;}
 .chart-card{background:#1a1e2e;border:0.5px solid #ffffff08;border-radius:12px;padding:18px;margin-bottom:14px;}
-.ct{font-size:13px;color:#888;margin-bottom:12px;font-weight:500;}
-.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:10px;font-size:12px;color:#666;}
+.ct{font-size:13px;color:#999;margin-bottom:12px;font-weight:500;}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:10px;font-size:12px;color:#888;}
 .legend span{display:flex;align-items:center;gap:5px;}
 .lsq{width:10px;height:10px;border-radius:2px;flex-shrink:0;}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
@@ -73,8 +78,8 @@ body{background:#0f1117;color:#fff;font-family:'DM Sans',sans-serif;min-height:1
 .occs{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
 .occ{background:#1e2235;border-radius:12px;padding:14px;text-align:center;}
 .occ-v{font-family:'DM Mono',monospace;font-size:26px;font-weight:500;}
-.occ-l{font-size:12px;color:#555;margin-top:4px;}
-.no-data{font-size:13px;color:#555;text-align:center;padding:24px 0;}
+.occ-l{font-size:12px;color:#777;margin-top:4px;}
+.no-data{font-size:13px;color:#666;text-align:center;padding:24px 0;}
 .divider{border:none;border-top:0.5px solid #ffffff08;margin:8px 0 24px;}
 .insight{font-size:12px;color:#888;margin-top:10px;padding-top:10px;border-top:0.5px solid #ffffff08;line-height:1.6;}
 .insight.pos{color:#1D9E75;}.insight.warn{color:#EF9F27;}.insight.neu{color:#378ADD;}
@@ -197,12 +202,14 @@ function renderDashboard(){
     <div class="filters-label">Filtres</div>
     <button class="reset-btn" onclick="resetFilters()">Réinitialiser</button>
   </div>
-  <div class="filters-grid">
+  <div class="filters-dates">
     <div class="date-wrap"><div class="date-label">Du</div><input class="date-input" type="date" id="f_dateMin"/></div>
     <div class="date-wrap"><div class="date-label">Au</div><input class="date-input" type="date" id="f_dateMax"/></div>
-    <select class="filter-pill" id="f_prise"><option value="all">Toutes les prises</option><option value="Oui">Avec prise</option><option value="Non">Sans prise</option></select>
-    <select class="filter-pill" id="f_dose"><option value="all">Toutes les doses</option>${doses.map(d=>`<option value="${d}">${d}</option>`).join('')}</select>
-    <select class="filter-pill" id="f_traitement"><option value="all">Tous les traitements</option>${traitements.map(t=>`<option value="${t}">${t}</option>`).join('')}</select>
+  </div>
+  <div class="filters-pills">
+    <select class="filter-pill" id="f_prise"><option value="all">Toutes les prises ▾</option><option value="Oui">Avec prise</option><option value="Non">Sans prise</option></select>
+    <select class="filter-pill" id="f_dose"><option value="all">Toutes les doses ▾</option>${doses.map(d=>`<option value="${d}">${d}</option>`).join('')}</select>
+    <select class="filter-pill" id="f_traitement"><option value="all">Tous les traitements ▾</option>${traitements.map(t=>`<option value="${t}">${t}</option>`).join('')}</select>
   </div>
 </div>`;
 
@@ -219,8 +226,8 @@ ${filtersHTML}
     <div class="ksub">sur <span class="hi">${nPrise}</span> jour${nPrise>1?'s':''} avec prise</div>
   </div>
   <div class="grid2">
-    <div class="mini"><div class="mini-l">Meilleur jour</div><div class="mini-v" style="color:#1D9E75;font-size:15px;">${bestIdx>=0?formatDate(rows[bestIdx].jour):'--'}</div><div style="font-size:12px;color:#555;margin-top:4px;">${bestIdx>=0?Math.round(maxEff*100)+'%':''}</div></div>
-    <div class="mini"><div class="mini-l">Pire jour</div><div class="mini-v" style="color:#D85A30;font-size:15px;">${worstIdx>=0?formatDate(rows[worstIdx].jour):'--'}</div><div style="font-size:12px;color:#555;margin-top:4px;">${worstIdx>=0?Math.round(minEff*100)+'%':''}</div></div>
+    <div class="mini"><div class="mini-l">Meilleur jour</div><div class="mini-v" style="color:#1D9E75;font-size:15px;">${bestIdx>=0?formatDate(rows[bestIdx].jour):'--'}</div><div style="font-size:12px;color:#777;margin-top:4px;">${bestIdx>=0?Math.round(maxEff*100)+'%':''}</div></div>
+    <div class="mini"><div class="mini-l">Pire jour</div><div class="mini-v" style="color:#D85A30;font-size:15px;">${worstIdx>=0?formatDate(rows[worstIdx].jour):'--'}</div><div style="font-size:12px;color:#777;margin-top:4px;">${worstIdx>=0?Math.round(minEff*100)+'%':''}</div></div>
   </div>
   <div class="chart-card">
     <div class="ct">Évolution de l'efficacité</div>

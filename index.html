@@ -360,8 +360,7 @@ ${filtersHTML}
       <div class="ct">Impact du type de journée sur l'efficacité et le sommeil</div>
       <div class="legend"><span><span class="lsq" style="background:#378ADDaa;"></span>Travaillé</span><span><span class="lsq" style="background:#888780aa;"></span>Non-travaillé</span></div>
       <div style="position:relative;width:100%;height:220px;"><canvas id="comp1" role="img" aria-label="Comparaison travaillé vs non travaillé">Comparaison</canvas></div>
-      <div class="insight warn">Coucher ${Math.abs((avgCoucherNonTrav||0)-(avgCoucherTrav||0))} min plus ${(avgCoucherNonTrav||0)>(avgCoucherTrav||0)?'tardif':'tôt'} les jours non-travaillés.</div>
-    </div>
+<div class="insight warn">Coucher ${Math.abs((avgCoucherAvantNonTrav||0)-(avgCoucherAvantTrav||0))} min plus ${(avgCoucherAvantNonTrav||0)>(avgCoucherAvantTrav||0)?'tardif':'tôt'} la veille d'un jour non-travaillé.</div>    </div>
     <div class="chart-card">
       <div class="ct">Profil comparatif : jours travaillés vs non-travaillés</div>
       <div class="legend"><span><span class="lsq" style="background:#378ADD;"></span>Travaillé</span><span><span class="lsq" style="background:#888;"></span>Non-travaillé</span></div>
@@ -400,9 +399,17 @@ ${filtersHTML}
 
       mkChart('dist1',{type:'bar',data:{labels:distLabels,datasets:[{data:distData,backgroundColor:distColors,borderWidth:0,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},stepSize:1,maxTicksLimit:5},grid:{color:gc}}}}});
 
+const lendemainTravaille=rows.map((r,i)=>{
+  const next=rows[i+1];
+  if(!next)return null;
+  return next['jour_travaillé']||next.jour_travaille||null;
+});
+const avgCoucherAvantTrav=Math.round(avg(rows.filter((_,i)=>lendemainTravaille[i]==='1'||lendemainTravaille[i]===1).map(r=>parseNum(r.coucher_min)).filter(v=>v!=null&&v>0)));
+const avgCoucherAvantNonTrav=Math.round(avg(rows.filter((_,i)=>lendemainTravaille[i]==='0'||lendemainTravaille[i]===0).map(r=>parseNum(r.coucher_min)).filter(v=>v!=null&&v>0)));
+
       mkChart('comp1',{type:'bar',data:{labels:['Efficacité moy.','Heure coucher moy.'],datasets:[
-        {label:'Travaillé',data:[avgEffTrav,avgCoucherTrav],backgroundColor:'#378ADDaa',borderRadius:6,borderWidth:0},
-        {label:'Non-travaillé',data:[avgEffNonTrav,avgCoucherNonTrav],backgroundColor:'#888780aa',borderRadius:6,borderWidth:0}
+        {label:'Travaillé',data:[avgEffTrav,avgCoucherAvantTrav],backgroundColor:'#378ADDaa',borderRadius:6,borderWidth:0},
+        {label:'Non-travaillé',data:[avgEffNonTrav,avgCoucherAvantNonTrav],backgroundColor:'#888780aa',borderRadius:6,borderWidth:0}
       ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>{const v=ctx.raw;if(ctx.dataIndex===1)return ctx.dataset.label+': '+fmtH(v);return ctx.dataset.label+': '+v+'%';}}}},scales:{x:{ticks:{color:tc,font:{size:11}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},maxTicksLimit:5},grid:{color:gc}}}}});
 
       mkChart('comp2',{type:'radar',data:{labels:['Efficacité','Régularité prise','Coucher tardif','FC repos'],datasets:[

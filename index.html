@@ -360,7 +360,7 @@ ${filtersHTML}
       <div class="ct">Impact du type de journée sur l'efficacité et le sommeil</div>
       <div class="legend"><span><span class="lsq" style="background:#378ADDaa;"></span>Travaillé</span><span><span class="lsq" style="background:#888780aa;"></span>Non-travaillé</span></div>
       <div style="position:relative;width:100%;height:220px;"><canvas id="comp1" role="img" aria-label="Comparaison travaillé vs non travaillé">Comparaison</canvas></div>
-<div class="insight warn">Coucher ${Math.abs((avgCoucherAvantNonTrav||0)-(avgCoucherAvantTrav||0))} min plus ${(avgCoucherAvantNonTrav||0)>(avgCoucherAvantTrav||0)?'tardif':'tôt'} la veille d'un jour non-travaillé.</div>    </div>
+<div class="insight warn">Coucher ${Math.abs((avgCoucherNonTrav||0)-(avgCoucherTrav||0))} min plus ${(avgCoucherNonTrav||0)>(avgCoucherTrav||0)?'tardif':'tôt'} les jours non-travaillés.</div>    </div>
     <div class="chart-card">
       <div class="ct">Profil comparatif : jours travaillés vs non-travaillés</div>
       <div class="legend"><span><span class="lsq" style="background:#378ADD;"></span>Travaillé</span><span><span class="lsq" style="background:#888;"></span>Non-travaillé</span></div>

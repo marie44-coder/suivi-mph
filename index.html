@@ -65,12 +65,12 @@ body{background:#0f1117;color:#fff;font-family:'DM Sans',sans-serif;min-height:1
 .mini-l{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;}
 .mini-v{font-family:'DM Mono',monospace;font-size:18px;font-weight:500;}
 .kcard{border-radius:12px;padding:16px 18px;margin-bottom:14px;}
-.kcard.g{background:#2a2010;border-left:3px solid #F0E2C3;}
+.kcard.g{background:#162010;border-left:3px solid #8FBF7A;}
 .kcard.b{background:#0C2840;border-left:3px solid #82B2C0;}
 .kcard.o{background:#2a1a10;border-left:3px solid #F6C7B3;}
 .klabel{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:4px;}
 .kval{font-family:'DM Mono',monospace;font-size:32px;font-weight:500;}
-.kval.g{color:#F0E2C3;}.kval.b{color:#C3DEDD;}.kval.o{color:#F6C7B3;}
+.kval.g{color:#8FBF7A;}.kval.b{color:#C3DEDD;}.kval.o{color:#F6C7B3;}
 .ksub{font-size:12px;color:#555;margin-top:5px;}
 .ksub .hi{color:#DCECE9;}.ksub .lo{color:#F6C7B3;}.ksub .bl{color:#82B2C0;}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
@@ -156,7 +156,7 @@ async function startWithKey(){
 }
 
 const filterState={prise:'all',dose:'all',traitement:'all',dateMin:null,dateMax:null};
-let calMonthIdx=0;let calView='eff';
+let calMonthIdx=0;let calView='eff';let calMonthInitialized=false;
 function initCalMonthIdx(){const allRows=rawData.filter(r=>r.jour&&r.jour.trim());const months=[...new Set(allRows.map(r=>{const d=parseDateStr(r.jour);if(!d)return null;return d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');}).filter(Boolean))].sort();if(!months.length)return;const now=new Date();const curKey=now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0');const idx=months.indexOf(curKey);calMonthIdx=idx>=0?idx:months.length-1;}
 let granEff='jour';let granHeure='jour';let granFC='jour';
 
@@ -184,12 +184,12 @@ function groupByMonth(rows,valFn){
 
 function effBg(v){if(v==null)return'#1a1e2e';if(v>=60)return'#1a3a45';if(v>=50)return'#3d6878';if(v>=40)return'#82B2C0';if(v>=30)return'#C3DEDD';if(v>=20)return'#deeef0';return'#E8F4F5';}
 function effTx(v){if(v==null)return'#2a2d35';if(v>=50)return'#C3DEDD';if(v>=30)return'#1a3a45';return'#3d6878';}
-function coucherBg(m){if(m==null)return'#1a1e2e';if(m>=24*60+30)return'#1a3a45';if(m>=24*60+15)return'#3d6878';if(m>=24*60)return'#82B2C0';if(m>=23*60+45)return'#C3DEDD';if(m>=23*60+30)return'#deeef0';return'#E8F4F5';}
-function coucherTx(m){if(m==null)return'#2a2d35';if(m>=24*60)return'#C3DEDD';if(m>=23*60+30)return'#1a3a45';return'#3d6878';}
+function coucherBg(m){if(m==null)return'#1a1e2e';if(m>=150)return'#1a3a45';if(m>=120)return'#3d6878';if(m>=90)return'#82B2C0';if(m>=60)return'#C3DEDD';if(m>=30)return'#deeef0';return'#E8F4F5';}
+function coucherTx(m){if(m==null)return'#2a2d35';if(m>=90)return'#C3DEDD';if(m>=30)return'#1a3a45';return'#1a3a45';}
 function priseBg(m){if(m==null)return'#1a1e2e';if(m>=11*60+30)return'#1a3a45';if(m>=11*60)return'#3d6878';if(m>=10*60+30)return'#82B2C0';if(m>=10*60)return'#C3DEDD';if(m>=9*60+30)return'#deeef0';return'#E8F4F5';}
 function priseTx(m){if(m==null)return'#2a2d35';if(m>=11*60)return'#C3DEDD';if(m>=10*60+30)return'#1a3a45';return'#3d6878';}
-function effetsBg(effets){if(!effets||effets.length===0)return'#1e2235';const neg=['Irritabilite','Fatigue','Maux de tete'];const pos=['Concentration','Energie','Clarte'];const hasNeg=effets.some(e=>neg.some(n=>e.includes(n)));const hasPos=effets.some(e=>pos.some(p=>e.includes(p)));if(hasNeg&&hasPos)return'#3a2a10';if(hasNeg)return'#3a1a10';if(hasPos)return'#0a2a20';return'#1e2235';}
-function effetsTx(effets){if(!effets||effets.length===0)return'#333';const neg=['Irritabilite','Fatigue','Maux de tete'];const pos=['Concentration','Energie','Clarte'];const hasNeg=effets.some(e=>neg.some(n=>e.includes(n)));const hasPos=effets.some(e=>pos.some(p=>e.includes(p)));if(hasNeg&&hasPos)return'#F0E2C3';if(hasNeg)return'#F6C7B3';if(hasPos)return'#DCECE9';return'#555';}
+function effetsBg(effets){if(!effets||effets.length===0)return'#1a1e2e';const neg=['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit'];const pos=['Concentration','Energie','Motivation','Attention','Clarte'];const hasNeg=effets.some(e=>neg.some(n=>e.includes(n)));const hasPos=effets.some(e=>pos.some(p=>e.includes(p)));if(hasNeg&&hasPos)return'#2a1f0a';if(hasNeg)return'#2a1010';if(hasPos)return'#1a3020';return'#1a1e2e';}
+function effetsTx(effets){if(!effets||effets.length===0)return'rgba(195,222,221,0.5)';const neg=['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit'];const pos=['Concentration','Energie','Motivation','Attention','Clarte'];const hasNeg=effets.some(e=>neg.some(n=>e.includes(n)));const hasPos=effets.some(e=>pos.some(p=>e.includes(p)));if(hasNeg&&hasPos)return'#F0E2C3';if(hasNeg)return'#F6C7B3';if(hasPos)return'#8FBF7A';return'rgba(195,222,221,0.5)';}
 
 function buildCalendar(containerId,rows,effetsRows){
   const allRows=rawData.filter(r=>r.jour&&r.jour.trim());
@@ -230,6 +230,7 @@ function buildCalendar(containerId,rows,effetsRows){
     else if(calView==='effets'){bg=effetsBg(effets);tx=effetsTx(effets);if(effets.length>0){subText=effets.join(' · ');valText='';}else valText='.';}
     el.style.background=bg;
     if(noPrise&&calView!=='prise_on'){el.style.border='1px solid rgba(195,222,221,0.4)';}
+    else if(calView==='effets'&&effets.length===0&&hasPrise){el.style.border='1px solid rgba(195,222,221,0.25)';}
     const top=document.createElement('div');top.className='cc-top';
     const dayTx=(noPrise&&calView==='eff')?'rgba(195,222,221,0.7)':tx;    const dayEl=document.createElement('div');dayEl.className='cc-day';dayEl.textContent=d;dayEl.style.color=dayTx;top.appendChild(dayEl);
     if(hasPrise&&dose){const doseEl=document.createElement('div');doseEl.className='cc-dose';doseEl.textContent=dose;doseEl.style.color=tx;top.appendChild(doseEl);}
@@ -240,11 +241,11 @@ function buildCalendar(containerId,rows,effetsRows){
   }
   const lg=document.getElementById(containerId+'-legend');
   const nt=document.getElementById(containerId+'-note');
-  if(calView==='eff'){lg.innerHTML='<span>Faible</span><div class="swatch"><div style="background:#E8F4F5;"></div><div style="background:#C3DEDD;"></div><div style="background:#82B2C0;"></div><div style="background:#3d6878;"></div><div style="background:#1a3a45;"></div></div><span>Elevee</span><span style="margin-left:12px;color:#2a2d35;">. = sans prise</span>';nt.textContent='Plus la case est sombre, plus l efficacite est elevee. Dose affichee en haut a droite de chaque case avec prise.';}
+  if(calView==='eff'){lg.innerHTML='<span>Faible</span><div class="swatch"><div style="background:#E8F4F5;"></div><div style="background:#C3DEDD;"></div><div style="background:#82B2C0;"></div><div style="background:#3d6878;"></div><div style="background:#1a3a45;"></div></div><span>Elevee</span><span style="margin-left:12px;display:flex;align-items:center;gap:4px;"><div style="width:10px;height:10px;border-radius:2px;background:#1a1e2e;border:1px solid rgba(195,222,221,0.6);display:inline-block;"></div><span style="color:#888;">Sans prise</span></span';nt.textContent='Plus la case est sombre, plus l efficacite est elevee. Dose affichee en haut a droite de chaque case avec prise.';}
   else if(calView==='coucher'){lg.innerHTML='<span>Tot</span><div class="swatch"><div style="background:#E8F4F5;"></div><div style="background:#C3DEDD;"></div><div style="background:#82B2C0;"></div><div style="background:#1a3a45;"></div></div><span>Tardif</span>';nt.textContent='Plus la case est sombre, plus le coucher est tardif.';}
   else if(calView==='prise'){lg.innerHTML='<span>Tot</span><div class="swatch"><div style="background:#E8F4F5;"></div><div style="background:#C3DEDD;"></div><div style="background:#82B2C0;"></div><div style="background:#1a3a45;"></div></div><span>Tardif</span><span style="margin-left:12px;color:#2a2d35;">. = pas de prise</span>';nt.textContent='Plus la case est sombre, plus la prise est tardive.';}
   else if(calView==='prise_on'){lg.innerHTML='<span style="display:flex;align-items:center;gap:4px;"><div style="background:#3d6878;width:10px;height:10px;border-radius:2px;"></div><span>Prise effectuee</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:8px;"><div style="background:#1e2235;border:0.5px solid #2a2d35;width:10px;height:10px;border-radius:2px;"></div><span>Pas de prise</span></span>';nt.textContent='Vue binaire - jours avec et sans prise.';}
-  else if(calView==='effets'){lg.innerHTML='<span style="display:flex;align-items:center;gap:4px;"><div style="background:#0a2a20;width:10px;height:10px;border-radius:2px;"></div><span>Positifs</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:6px;"><div style="background:#3a1a10;width:10px;height:10px;border-radius:2px;"></div><span>Negatifs</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:6px;"><div style="background:#3a2a10;width:10px;height:10px;border-radius:2px;"></div><span>Mixtes</span></span>';nt.textContent='Les effets sont listes directement dans chaque case.';}
+  else if(calView==='effets'){lg.innerHTML='<span style="display:flex;align-items:center;gap:4px;"><div style="background:#1a3020;border:1px solid #8FBF7A;width:10px;height:10px;border-radius:2px;"></div><span>Positifs</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:6px;"><div style="background:#2a1010;border:1px solid #F6C7B3;width:10px;height:10px;border-radius:2px;"></div><span>Negatifs</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:6px;"><div style="background:#2a1f0a;border:1px solid #F0E2C3;width:10px;height:10px;border-radius:2px;"></div><span>Mixtes</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:6px;"><div style="background:#1a1e2e;border:1px solid rgba(195,222,221,0.4);width:10px;height:10px;border-radius:2px;"></div><span style="color:#888;">Sans effet</span></span>';nt.textContent='Les effets sont listes directement dans chaque case.';}
 }
 
 function calPrev(){calMonthIdx--;renderDashboard();}
@@ -292,8 +293,8 @@ function renderDashboard(){
   const negCount=countByEffet(effetsNeg);
   const maxPos=posCount.length?posCount[0][1]:1;
   const maxNeg=negCount.length?negCount[0][1]:1;
-  const posColors=['#DCECE9','#82B2C0','#3d6878'];
-  const negColors=['#F6C7B3','#d4906a','#a06040'];
+  const posColors=['#C8E6C0','#8FBF7A','#4a8f5a'];
+  const negColors=['#F6C7B3','#E8956A','#C0603A'];
   const shortDates=rows.map(r=>{const p=r.jour.split('/');return p.length>=2?p[0]+'/'+p[1]:r.jour;});
   const effSerie=rows.map(r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});
   const priseSerie=rows.map(r=>toMin(r.heure_prise));
@@ -416,7 +417,7 @@ function renderDashboard(){
       function corrColor(v,isMax){if(isMax)return{bg:'#F0E2C3',tx:'#4a2010'};if(v>=0.4)return{bg:'#1a3a45',tx:'#C3DEDD'};if(v>=0.15)return{bg:'#2a3a4a',tx:'#82B2C0'};if(v>=-0.15)return{bg:'#1e2235',tx:'#444'};if(v>=-0.4)return{bg:'#3a2a20',tx:'#F0E2C3'};return{bg:'#4a2010',tx:'#F6C7B3'};}
       const hm=document.getElementById('corr-heatmap');
       if(hm){const hr=document.createElement('div');hr.style.cssText='display:grid;grid-template-columns:90px repeat(4,1fr);gap:3px;';hr.innerHTML='<div></div>'+corrMetrics.map(m=>'<div style="font-size:10px;color:#444;text-align:center;padding:4px 2px;">'+m+'</div>').join('');hm.appendChild(hr);corrMatrix.forEach((row,i)=>{const r=document.createElement('div');r.style.cssText='display:grid;grid-template-columns:90px repeat(4,1fr);gap:3px;';r.innerHTML='<div style="font-size:10px;color:#444;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;">'+corrMetrics[i]+'</div>'+row.map((v,j)=>{const absV=v!=null?Math.abs(v):0;const isMax=i!==j&&v!=null&&maxCorrI>=0&&i===maxCorrI&&j===maxCorrJ;const c=i===j?{bg:'#161920',tx:'#333'}:corrColor(v,isMax);const b=isMax?'font-weight:500;':'';const d=i===j?'&mdash;':v!=null?v.toFixed(2):'--';return'<div style="background:'+c.bg+';border-radius:4px;padding:8px 4px;text-align:center;font-size:11px;color:'+c.tx+';font-family:\'DM Mono\',monospace;'+b+'">'+d+'</div>';}).join('');hm.appendChild(r);});}
-      const exDiv=document.getElementById('corr-examples');if(exDiv){const examples=[];corrMatrix.forEach((row,i)=>row.forEach((v,j)=>{if(i<j&&v!=null&&Math.abs(v)>=0.3){const dir=v>0?'augmentent ensemble':'\u00e9voluent en sens inverse';examples.push('<div style="font-size:12px;color:#888;margin-bottom:6px;"><span style="color:#C3DEDD;font-weight:500;">'+corrMetrics[i]+' / '+corrMetrics[j]+'</span> (r\u00a0=\u00a0'+v.toFixed(2)+') \u2014 Ces deux m\u00e9triques '+dir+'.</div>');}}));exDiv.innerHTML=examples.length?'<div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Exemples de lecture</div>'+examples.join(''):'<div style="font-size:12px;color:#444;">Pas de corr\u00e9lation notable.</div>';}
+      const exDiv=document.getElementById('corr-examples');if(exDiv){const examples=[];corrMatrix.forEach((row,i)=>row.forEach((v,j)=>{if(i<j&&v!=null&&Math.abs(v)>=0.3){const interp={'Efficacite/H. prise':{1:'Quand la prise est tardive, l efficacite tend a etre plus elevee.',0:'Quand la prise est tardive, l efficacite tend a etre plus faible.'},'Efficacite/FC repos':{1:'Une FC plus elevee au repos est associee a une meilleure efficacite ressentie.',0:'Une FC plus elevee au repos est associee a une efficacite plus faible.'},'Efficacite/Coucher':{1:'Les couchers tardifs sont associes a une meilleure efficacite.',0:'Les couchers tardifs sont associes a une efficacite plus faible.'},'H. prise/FC repos':{1:'Les prises tardives correspondent aux jours avec FC plus elevee.',0:'Les prises tardives correspondent aux jours avec FC plus basse.'},'H. prise/Coucher':{1:'Les prises tardives correspondent aux couchers tardifs - probablement les week-ends.',0:'Les prises tardives correspondent paradoxalement aux couchers les plus precoces.'},'FC repos/Coucher':{1:'Les nuits tardives sont associees a une FC plus elevee au repos.',0:'Les nuits tardives sont associees a une FC plus basse au repos.'}};const key=corrMetrics[i]+'/'+corrMetrics[j];const txt=interp[key]?interp[key][v>0?1:0]:(v>0?corrMetrics[i]+' augmente quand '+corrMetrics[j]+' augmente.':corrMetrics[i]+' augmente quand '+corrMetrics[j]+' diminue.');examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:8px;"><span style="color:#C3DEDD;font-weight:500;">'+corrMetrics[i]+' / '+corrMetrics[j]+'</span> <span style="color:#555;">(r = '+v.toFixed(2)+')</span><br><span style="color:#888;">'+txt+'</span></div>');}}));exDiv.innerHTML=examples.length?'<div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Exemples de lecture</div>'+examples.join(''):'<div style="font-size:12px;color:#444;">Pas de corr\u00e9lation notable.</div>';}
     },100);
   }
 

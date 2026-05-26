@@ -70,16 +70,16 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
     <div class="question">Prends-tu toujours du <span>Méthylphénidate Générique</span> depuis hier ?</div>
     <div class="btn-group cols2">
       <div class="btn-opt selected green" id="traitement-oui" onclick="selectTraitement(true)">Oui, toujours</div>
-      <div class="btn-opt" id="traitement-non" onclick="selectTraitement(false)">Non, changement</div>
+      <div class="btn-opt" id="traitement-non" onclick="selectTraitement(false)">Non, changement/oubli</div>
     </div>
   </div>
 
   <div class="card">
-    <div class="question">Etais-tu toujours à <span>18mg</span> hier ?</div>
+    <div class="question">Étais-tu toujours à <span>36mg</span> hier ?</div>
     <div class="btn-group cols2" id="dose-group">
-      <div class="btn-opt selected green" onclick="selectDose(this,'18mg')">18mg — oui</div>
+      <div class="btn-opt" onclick="selectDose(this,'27mg')">18mg</div>
       <div class="btn-opt" onclick="selectDose(this,'27mg')">27mg</div>
-      <div class="btn-opt" onclick="selectDose(this,'36mg')">36mg</div>
+      <div class="btn-opt selected green" onclick="selectDose(this,'36mg')">36mg — oui</div>
       <div class="btn-opt" onclick="selectDose(this,'54mg')">54mg</div>
     </div>
   </div>
@@ -137,7 +137,7 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
     </div>
 
     <div class="card">
-      <div class="question">Comment évalues-tu l'efficacité du traitement aujourd'hui ?</div>
+      <div class="question">Comment évaluerais-tu l'efficacité du traitement hier ?</div>
       <div class="sublabel">0% = aucun effet ressenti · 100% = effet maximal</div>
       <div class="range-wrap">
         <input type="range" id="efficacite" min="0" max="100" step="5" value="30" oninput="updateEff(this.value)"/>
@@ -147,29 +147,29 @@ input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;hei
   </div>
 
   <div class="card">
-    <div class="question">Quelle était ta fréquence cardiaque au repos aujourd'hui ?</div>
+    <div class="question">Quelle était ta fréquence cardiaque au repos hier ?</div>
     <div class="sublabel">Valeur moyenne mesurée au repos (bpm)</div>
     <input type="number" id="fq_repos_moy" placeholder="ex: 68" min="30" max="200"/>
   </div>
 
   <div class="card">
-    <div class="question">Quelle était ta fréquence cardiaque minimale ?</div>
+    <div class="question">Et fréquence cardiaque minimale ?</div>
     <input type="number" id="plage_min" placeholder="ex: 48" min="20" max="200"/>
   </div>
 
   <div class="card">
-    <div class="question">Quelle était ta fréquence cardiaque maximale ?</div>
+    <div class="question">Et ta fréquence cardiaque maximale ?</div>
     <input type="number" id="plage_max" placeholder="ex: 145" min="20" max="250"/>
   </div>
 
   <div class="card">
-    <div class="question">À quelle heure t'es-tu couché(e) cette nuit ?</div>
+    <div class="question">À quelle heure t'es-tu couchée cette nuit ?</div>
     <div class="sublabel">Si après minuit, indique l'heure du matin (ex: 01:30)</div>
     <input type="time" id="horaire_coucher" placeholder="01:30"/>
   </div>
 
   <div class="card">
-    <div class="question">C'était un jour travaillé ?</div>
+    <div class="question">Est-ce que c'était un jour travaillé ?</div>
     <div class="btn-group cols2">
       <div class="btn-opt selected green" id="travaille-oui" onclick="selectTravaille('Oui')">Oui</div>
       <div class="btn-opt" id="travaille-non" onclick="selectTravaille('Non')">Non</div>

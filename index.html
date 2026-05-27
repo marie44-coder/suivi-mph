@@ -425,7 +425,7 @@ function renderDashboard(){
 '<div class="sec"><div class="slabel">Limites de l’analyse</div><div class="limits-card"><p>· Sur '+nPrise+' jours — aucune corrélation statistiquement significative à ce stade</p><p>· Données auto-rapportées — biais de perception possible</p><p>· Une seule dose testée — pas de comparaison possible</p><p>· Facteurs externes non mesurés (stress, alimentation, activité)</p><p>· Potentiel effet placébo non exclu</p><p>· Pas de comparaison avec une période sans traitement</p></div></div>';
 
     setTimeout(()=>{
-      const _travByWeek={};rows.forEach(r=>{const d=parseDateStr(r.jour);if(!d)return;const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));const k='S '+mon.toISOString().slice(5,7)+'/'+mon.toISOString().slice(2,4);if(!_travByWeek[k])_travByWeek[k]={t:0,n:0};_travByWeek[k].n++;if(r['jour_travaillé']==='1'||r.jour_travaille==='1')_travByWeek[k].t++;});
+      const _travByWeek={};rows.forEach(r=>{const d=parseDateStr(r.jour);if(!d)return;const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));const const k='S '+mon.toISOString().slice(5,7)+'/'+mon.toISOString().slice(2,4);if(!_travByWeek[k])_travByWeek[k]={t:0,n:0};_travByWeek[k].n++;if(r['jour_travaillé']==='1'||r.jour_travaille==='1')_travByWeek[k].t++;});
 const wfTravCounts=semWeeks.map(w=>(_travByWeek[w.label]||{t:0}).t);
       mkChart('c_wf',{type:'bar',data:{labels:wfLabels,datasets:[
   {data:wfData,backgroundColor:wfColors,borderRadius:5,borderWidth:0,yAxisID:'y',label:'Variation'},

@@ -188,7 +188,7 @@ function coucherBg(m){if(m==null)return'#1a1e2e';if(m>=150)return'#1a3a45';if(m>
 function coucherTx(m){if(m==null)return'#2a2d35';if(m>=90)return'#C3DEDD';if(m>=30)return'#1a3a45';return'#1a3a45';}
 function priseBg(m){if(m==null)return'#1a1e2e';if(m>=11*60+30)return'#1a3a45';if(m>=11*60)return'#3d6878';if(m>=10*60+30)return'#82B2C0';if(m>=10*60)return'#C3DEDD';if(m>=9*60+30)return'#deeef0';return'#E8F4F5';}
 function priseTx(m){if(m==null)return'#2a2d35';if(m>=11*60)return'#C3DEDD';if(m>=10*60+30)return'#1a3a45';return'#3d6878';}
-function effetsBg(effets){if(!effets||effets.length===0)return'#1a1e2e';const neg=['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit','App'];const pos=['Concentration','Energie','Motivation','Attention','Clarte'];const hasNeg=effets.some(e=>neg.some(n=>e.includes(n))||e.includes('↓'));const hasPos=effets.some(e=>pos.some(p=>e.includes(p)));if(hasNeg&&hasPos)return'#221a0a';if(hasNeg)return'#221010';if(hasPos)return'#102018';return'#1a1e2e';}
+function effetsBg(effets){if(!effets||effets.length===0)return'#1e2235';const neg=['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit','Appétit'];const pos=['Concentration','Energie','Motivation','Attention','Clarte'];const hasNeg=effets.some(e=>neg.some(n=>e.includes(n))||e.includes('↓'));const hasPos=effets.some(e=>pos.some(p=>e.includes(p)));if(hasNeg&&hasPos)return'#251a08';if(hasNeg)return'#2a1010';if(hasPos)return'#0f2535';return'#1e2235';}
 function effetsTx(effets){if(!effets||effets.length===0)return'rgba(195,222,221,0.35)';const neg=['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit','App'];const pos=['Concentration','Energie','Motivation','Attention','Clarte'];const hasNeg=effets.some(e=>neg.some(n=>e.includes(n))||e.includes('↓'));const hasPos=effets.some(e=>pos.some(p=>e.includes(p)));if(hasNeg&&hasPos)return'#E8D0A0';if(hasNeg)return'#E8B8A0';if(hasPos)return'#A8CFA8';return'rgba(195,222,221,0.35)';}
 
 function buildCalendar(containerId,rows,effetsRows){
@@ -234,13 +234,26 @@ function buildCalendar(containerId,rows,effetsRows){
     else if(calView==='effets'){bg=effetsBg(effets);tx=effetsTx(effets);if(effets.length>0){subText=effets.join(' · ');valText='';}else valText='.';}
     el.style.background=bg;
     if(noPrise){el.style.border='1px solid rgba(195,222,221,0.4)';}
-    else if(calView==='effets'&&effets.length===0&&hasPrise){el.style.border='1px solid rgba(195,222,221,0.25)';}
+    else if(calView==='effets'){
+      const hasNegB=effets.some(e=>['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit','Appétit'].some(n=>e.includes(n))||e.includes('↓'));
+      const hasPosB=effets.some(e=>['Concentration','Energie','Motivation','Attention','Clarte'].some(p=>e.includes(p)));
+      if(effets.length===0)el.style.border='0.5px solid rgba(195,222,221,0.2)';
+      else if(hasNegB&&hasPosB)el.style.border='0.5px solid #8a6020';
+      else if(hasNegB)el.style.border='0.5px solid #9a3020';
+      else if(hasPosB)el.style.border='0.5px solid #2a6a8a';
+      else el.style.border='0.5px solid rgba(195,222,221,0.2)';
+    }
     const top=document.createElement('div');top.className='cc-top';
     const dayTx=(noPrise&&calView==='eff')?'rgba(195,222,221,0.7)':tx;    const dayEl=document.createElement('div');dayEl.className='cc-day';dayEl.textContent=d;dayEl.style.color=dayTx;top.appendChild(dayEl);
     if(hasPrise&&dose){const doseEl=document.createElement('div');doseEl.className='cc-dose';doseEl.textContent=dose;doseEl.style.color=tx;top.appendChild(doseEl);}
     el.appendChild(top);
     if(subText){const s=document.createElement('div');s.className='cc-effets';s.style.color=tx;s.style.fontSize='8px';s.style.lineHeight='1.3';s.style.marginTop='auto';s.textContent=subText;el.appendChild(s);}
-    else{const v=document.createElement('div');v.className='cc-val';v.textContent=valText;v.style.color=tx;el.appendChild(v);}
+    else{const v=document.createElement('div');
+    if(calView==='effets'&&effets.length===0&&hasPrise){
+      v.style.cssText='font-size:9px;line-height:1.4;margin-top:auto;color:rgba(195,222,221,0.25);';
+      v.textContent='Aucun effet renseigné';
+    }else{v.className='cc-val';v.textContent=valText;v.style.color=tx;}
+    el.appendChild(v);}
     cells.appendChild(el);
   }
   const lg=document.getElementById(containerId+'-legend');
@@ -249,7 +262,7 @@ function buildCalendar(containerId,rows,effetsRows){
   else if(calView==='coucher'){lg.innerHTML='<span>Tot</span><div class="swatch"><div style="background:#E8F4F5;"></div><div style="background:#C3DEDD;"></div><div style="background:#82B2C0;"></div><div style="background:#1a3a45;"></div></div><span>Tardif</span>';nt.textContent='Plus la case est sombre, plus le coucher est tardif.';}
   else if(calView==='prise'){lg.innerHTML='<span>Tot</span><div class="swatch"><div style="background:#E8F4F5;"></div><div style="background:#C3DEDD;"></div><div style="background:#82B2C0;"></div><div style="background:#1a3a45;"></div></div><span>Tardif</span><span style="margin-left:12px;color:#2a2d35;"></span>';nt.textContent='Plus la case est sombre, plus la prise est tardive.';}
   else if(calView==='prise_on'){lg.innerHTML='<span style="display:flex;align-items:center;gap:4px;"><div style="background:#3d6878;width:10px;height:10px;border-radius:2px;"></div><span>Prise effectuee</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:8px;"><div style="background:#1e2235;border:0.5px solid #2a2d35;width:10px;height:10px;border-radius:2px;"></div><span>Pas de prise</span></span>';nt.textContent='Vue binaire — jours avec et sans prise.';}
-  else if(calView==='effets'){lg.innerHTML='<span style="display:flex;align-items:center;gap:4px;"><div style="background:#1a3020;border:1px solid #8FBF7A;width:10px;height:10px;border-radius:2px;"></div><span>Positifs</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:6px;"><div style="background:#2a1010;border:1px solid #F6C7B3;width:10px;height:10px;border-radius:2px;"></div><span>Negatifs</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:6px;"><div style="background:#2a1f0a;border:1px solid #F0E2C3;width:10px;height:10px;border-radius:2px;"></div><span>Mixtes</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:6px;"><div style="background:#1a1e2e;border:1px solid rgba(195,222,221,0.4);width:10px;height:10px;border-radius:2px;"></div><span style="color:#888;">Sans effet</span></span>';nt.textContent='Les effets sont listés directement dans chaque case.';}
+  else if(calView==='effets'){lg.innerHTML='<span style="display:flex;align-items:center;gap:4px;"><div style="background:#0f2535;border:1px solid #2a6a8a;width:10px;height:10px;border-radius:2px;"></div><span>Positifs</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:6px;"><div style="background:#2a1010;border:1px solid #9a3020;width:10px;height:10px;border-radius:2px;"></div><span>Negatifs</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:6px;"><div style="background:#251a08;border:1px solid #8a6020;width:10px;height:10px;border-radius:2px;"></div><span>Mixtes</span></span><span style="display:flex;align-items:center;gap:4px;margin-left:6px;"><div style="background:#1e2235;border:1px solid rgba(195,222,221,0.2);width:10px;height:10px;border-radius:2px;"></div><span style="color:#888;">Aucun effet renseigné</span></span>';nt.textContent='Les effets sont listés directement dans chaque case.';}
 }
 
 function calPrev(){calMonthIdx--;renderDashboard();}

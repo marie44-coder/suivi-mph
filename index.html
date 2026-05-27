@@ -215,7 +215,7 @@ function buildCalendar(containerId,rows,effetsRows){
     const r=rowsMap[d];
     if(!r){const e=document.createElement('div');e.className='cc-nodata';cells.appendChild(e);continue;}
     const el=document.createElement('div');el.className='cc';
-    const effVal=parseNum(getField(r,'efficacité_auto-rapportee'));
+    const effVal=parseNum(getField(r,'efficacite_auto-rapportee'));
     const effPct=effVal!=null?Math.round(effVal*100):null;
     const hasPrise=r.prise==='Oui';
     const coucherMin=parseNum(r.coucher_min);
@@ -268,7 +268,7 @@ function renderDashboard(){
   const dose=allRows.length?(allRows[allRows.length-1].dose||'18mg'):'18mg';
   const type=allRows.length?(allRows[allRows.length-1].type||'Générique'):'Générique';
   const today=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  const effVals=rows.map(r=>parseNum(getField(r,'efficacité_auto-rapportee'))).filter(v=>v!=null);
+  const effVals=rows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))).filter(v=>v!=null);
   const avgEff=effVals.length?Math.round(avg(effVals)*100):null;
   const maxEff=effVals.length?Math.max(...effVals):null;
   const minEff=effVals.length?Math.min(...effVals):null;
@@ -297,7 +297,7 @@ function renderDashboard(){
   const posColors=['#3d6878','#82B2C0','#C3DEDD'];
   const negColors=['#C0603A','#E8956A','#F6C7B3'];
   const shortDates=rows.map(r=>{const p=r.jour.split('/');return p.length>=2?p[0]+'/'+p[1]:r.jour;});
-  const effSerie=rows.map(r=>{const v=parseNum(getField(r,'efficacité_auto-rapportee'));return v!=null?Math.round(v*100):null;});
+  const effSerie=rows.map(r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});
   const priseSerie=rows.map(r=>toMin(r.heure_prise));
   const coucherSerie=rows.map(r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;});
   const fcSerie=rows.map(r=>parseNum(r.fq_repos_moy));
@@ -312,8 +312,8 @@ function renderDashboard(){
   });
 
   function getEffSeries(gran){
-    if(gran==='semaine'){const w=groupByWeek(rows,r=>{const v=parseNum(getField(r,'efficacité_auto-rapportee'));return v!=null?Math.round(v*100):null;});return{labels:w.map(x=>x.label),data:w.map(x=>x.val)};}
-    if(gran==='mois'){const m=groupByMonth(rows,r=>{const v=parseNum(getField(r,'efficacité_auto-rapportee'));return v!=null?Math.round(v*100):null;});return{labels:m.map(x=>x.label),data:m.map(x=>x.val)};}
+    if(gran==='semaine'){const w=groupByWeek(rows,r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});return{labels:w.map(x=>x.label),data:w.map(x=>x.val)};}
+    if(gran==='mois'){const m=groupByMonth(rows,r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});return{labels:m.map(x=>x.label),data:m.map(x=>x.val)};}
     return{labels:shortDates,data:effSerie};
   }
   function getHeureSeries(gran){
@@ -359,21 +359,21 @@ function renderDashboard(){
   } else {
     const travRows=rows.filter(r=>r['jour_travaill\u00e9']==='1'||r.jour_travaille==='1');
     const nonTravRows=rows.filter(r=>r['jour_travaill\u00e9']==='0'||r.jour_travaille==='0');
-    const avgEffTrav=travRows.length?Math.round(avg(travRows.map(r=>parseNum(getField(r,'efficacité_auto-rapportee'))).filter(v=>v!=null))*100):null;
-    const avgEffNonTrav=nonTravRows.length?Math.round(avg(nonTravRows.map(r=>parseNum(getField(r,'efficacité_auto-rapportee'))).filter(v=>v!=null))*100):null;
+    const avgEffTrav=travRows.length?Math.round(avg(travRows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))).filter(v=>v!=null))*100):null;
+    const avgEffNonTrav=nonTravRows.length?Math.round(avg(nonTravRows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))).filter(v=>v!=null))*100):null;
     const effDist={};effVals.forEach(v=>{const k=Math.round(v*100/10)*10;effDist[k]=(effDist[k]||0)+1;});
     const distLabelsSorted=Object.keys(effDist).sort((a,b)=>a-b);
     const distLabels=distLabelsSorted.map(k=>k+'%');
     const travDist={};const nonTravDist={};
-    travRows.forEach(r=>{const v=parseNum(getField(r,'efficacité_auto-rapportee'));if(v!=null){const k=Math.round(v*100/10)*10;travDist[k]=(travDist[k]||0)+1;}});
-    nonTravRows.forEach(r=>{const v=parseNum(getField(r,'efficacité_auto-rapportee'));if(v!=null){const k=Math.round(v*100/10)*10;nonTravDist[k]=(nonTravDist[k]||0)+1;}});
+    travRows.forEach(r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));if(v!=null){const k=Math.round(v*100/10)*10;travDist[k]=(travDist[k]||0)+1;}});
+    nonTravRows.forEach(r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));if(v!=null){const k=Math.round(v*100/10)*10;nonTravDist[k]=(nonTravDist[k]||0)+1;}});
     const travDistData=distLabelsSorted.map(k=>travDist[k]||0);
     const nonTravDistData=distLabelsSorted.map(k=>nonTravDist[k]||0);
-    const scatterPriseEff=rows.map(r=>{const p=toMin(r.heure_prise);const e=parseNum(getField(r,'efficacité_auto-rapportee'));if(p==null||e==null)return null;const pct=Math.round(e*100);return{x:p,y:pct,eff:pct};}).filter(Boolean);
-    const scatterCoucherEff=rows.map((r,i)=>{const c=parseNum(r.coucher_min);const nxt=rows[i+1];if(!nxt)return null;const e=parseNum(getField(nxt,'efficacité_auto-rapportee'));if(c==null||e==null||c<=0)return null;return{x:c,y:Math.round(e*100)};}).filter(Boolean);
+    const scatterPriseEff=rows.map(r=>{const p=toMin(r.heure_prise);const e=parseNum(getField(r,'efficacite_auto-rapportee'));if(p==null||e==null)return null;const pct=Math.round(e*100);return{x:p,y:pct,eff:pct};}).filter(Boolean);
+    const scatterCoucherEff=rows.map((r,i)=>{const c=parseNum(r.coucher_min);const nxt=rows[i+1];if(!nxt)return null;const e=parseNum(getField(nxt,'efficacite_auto-rapportee'));if(c==null||e==null||c<=0)return null;return{x:c,y:Math.round(e*100)};}).filter(Boolean);
     const ecarts=rows.map(r=>{const p=toMin(r.heure_prise);if(p==null||avgPrise==null)return null;return Math.round(p-avgPrise);}).filter(v=>v!=null);
     const ecartsJours=rows.filter(r=>toMin(r.heure_prise)!=null).map(r=>{const p=r.jour.split('/');return p.length>=2?p[0]+'/'+p[1]:r.jour;});
-    const semWeeks=groupByWeek(rows,r=>{const v=parseNum(getField(r,'efficacité_auto-rapportee'));return v!=null?Math.round(v*100):null;});
+    const semWeeks=groupByWeek(rows,r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});
     const wfData=semWeeks.map((w,i)=>i===0?w.val:(w.val!=null&&semWeeks[i-1].val!=null?Math.round(w.val-semWeeks[i-1].val):null));
     const wfLabels=semWeeks.map((w,i)=>i===0?w.label+' (base)':w.label+(wfData[i]!=null?(wfData[i]>=0?' (+'+wfData[i]+' pts)':' ('+wfData[i]+' pts)'):''));
     const wfColors=wfData.map((v,i)=>i===0?'#82B2C0':v!=null?(v>=0?'#DCECE9':'#F6C7B3'):'#2a2d35');
@@ -383,7 +383,7 @@ function renderDashboard(){
     let wfConclusion='Pas assez de données pour évaluer la tendance.';
     if(ae1!=null&&ae2!=null){const diff=Math.round(ae2-ae1);if(Math.abs(diff)<=3)wfConclusion='Efficacité stable sur les '+semWeeks.length+' semaines observées — pas de tendance nette à ce stade.';else if(diff>0)wfConclusion='Tendance à la hausse : efficacité moyenne en progrèssion de '+diff+' pts entre la première et la deuxième moitié de la période.';else wfConclusion='Tendance à la baisse : efficacité moyenne en recul de '+Math.abs(diff)+' pts entre la première et la deuxième moitié de la période.';}
     const corrMetrics=['Efficacité','H. prise','FC repos','Coucher'];
-    const corrVals=[rows.map(r=>parseNum(getField(r,'efficacité_auto-rapportee'))),rows.map(r=>toMin(r.heure_prise)),rows.map(r=>parseNum(r.fq_repos_moy)),rows.map(r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;})];
+    const corrVals=[rows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))),rows.map(r=>toMin(r.heure_prise)),rows.map(r=>parseNum(r.fq_repos_moy)),rows.map(r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;})];
     const corrMatrix=corrVals.map((a,i)=>corrVals.map((b,j)=>i===j?1:pearson(a,b)));
     let maxCorrVal=0;let maxCorrI=-1;let maxCorrJ=-1;
     corrMatrix.forEach((row,i)=>row.forEach((v,j)=>{if(i<j&&v!=null&&Math.abs(v)>maxCorrVal){maxCorrVal=Math.abs(v);maxCorrI=i;maxCorrJ=j;}}));

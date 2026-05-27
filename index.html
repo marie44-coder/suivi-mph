@@ -173,8 +173,9 @@ function getFiltered(){
 function getFilteredEffets(rows){const dates=new Set(rows.map(r=>r.jour));return rawEffets.filter(e=>dates.has(e.date));}
 function resetFilters(){filterState.prise='all';filterState.dose='all';filterState.traitement='all';filterState.dateMin=null;filterState.dateMax=null;renderDashboard();}
 
+function weekKey(d){const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));const y=mon.getFullYear();const m=String(mon.getMonth()+1).padStart(2,'0');return y+'-'+m+'-'+String(mon.getDate()).padStart(2,'0');}
 function groupByWeek(rows,valFn){
-  const weeks={};rows.forEach(r=>{const d=parseDateStr(r.jour);if(!d)return;const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));const k=mon.toISOString().slice(0,10);if(!weeks[k])weeks[k]=[];const v=valFn(r);if(v!=null)weeks[k].push(v);});
+  const weeks={};rows.forEach(r=>{const d=parseDateStr(r.jour);if(!d)return;const k=weekKey(d);if(!weeks[k])weeks[k]=[];const v=valFn(r);if(v!=null)weeks[k].push(v);});
   return Object.entries(weeks).sort(([a],[b])=>a.localeCompare(b)).map(([k,vals])=>({label:'S '+k.slice(5,7)+'/'+k.slice(2,4),val:vals.length?avg(vals):null}));
 }
 function groupByMonth(rows,valFn){
@@ -425,7 +426,7 @@ function renderDashboard(){
 '<div class="sec"><div class="slabel">Limites de l’analyse</div><div class="limits-card"><p>· Sur '+nPrise+' jours — aucune corrélation statistiquement significative à ce stade</p><p>· Données auto-rapportées — biais de perception possible</p><p>· Une seule dose testée — pas de comparaison possible</p><p>· Facteurs externes non mesurés (stress, alimentation, activité)</p><p>· Potentiel effet placébo non exclu</p><p>· Pas de comparaison avec une période sans traitement</p></div></div>';
 
     setTimeout(()=>{
-      const _travByWeek={};rows.forEach(r=>{const d=parseDateStr(r.jour);if(!d)return;const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));const isoK=mon.toISOString().slice(0,10);const k='S '+isoK.slice(5,7)+'/'+isoK.slice(2,4);if(!_travByWeek[k])_travByWeek[k]={t:0,n:0};_travByWeek[k].n++;if(r['jour_travaillé']==='1'||r.jour_travaille==='1')_travByWeek[k].t++;});
+      const _travByWeek={};rows.forEach(r=>{const d=parseDateStr(r.jour);if(!d)return;const isoK=weekKey(d);const k='S '+isoK.slice(5,7)+'/'+isoK.slice(2,4);if(!_travByWeek[k])_travByWeek[k]={t:0,n:0};_travByWeek[k].n++;if(r['jour_travaillé']==='1'||r.jour_travaille==='1')_travByWeek[k].t++;});
 const wfTravCounts=semWeeks.map(w=>(_travByWeek[w.label]||{t:0}).t);
       mkChart('c_wf',{type:'bar',data:{labels:wfLabels,datasets:[
         {data:wfData,backgroundColor:wfColors,borderRadius:5,borderWidth:0,yAxisID:'y',label:'Variation'},

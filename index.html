@@ -231,7 +231,7 @@ function buildCalendar(containerId,rows,effetsRows){
     let noPrise=!hasPrise;    if(calView==='eff'){bg=effBg(effPct);tx=effTx(effPct);valText=effPct!=null?effPct+'%':'.';}
     else if(calView==='coucher'){bg=coucherBg(coucherMin);tx=coucherTx(coucherMin);valText=fmtH(coucherMin)||'.';}
     else if(calView==='prise'){if(!hasPrise){bg='#1a1e2e';tx='#333';valText='.';}else{bg=priseBg(priseMin);tx=priseTx(priseMin);valText=fmtH(priseMin)||'.';}}
-    else if(calView==='prise_on'){if(hasPrise){const doseColors={'18mg':{bg:'#0f2a35',tx:'#C3DEDD'},'27mg':{bg:'#1a3a45',tx:'#82B2C0'},'36mg':{bg:'#3d6878',tx:'#C3DEDD'},'54mg':{bg:'#82B2C0',tx:'#0f1117'}};const dc=dose&&doseColors[dose]?doseColors[dose]:{bg:'#3d6878',tx:'#C3DEDD'};bg=dc.bg;tx=dc.tx;valText=dose||'v';}else{bg='#1a1e2e';tx='rgba(195,222,221,0.6)';valText='x';}}
+    else if(calView==='prise_on'){if(hasPrise){const doseColors={'18mg':{bg:'#C3DEDD',tx:'#1a3a45'},'27mg':{bg:'#82B2C0',tx:'#1a3a45'},'36mg':{bg:'#3d6878',tx:'#C3DEDD'},'54mg':{bg:'#1a3a45',tx:'#C3DEDD'}};const dc=dose&&doseColors[dose]?doseColors[dose]:{bg:'#3d6878',tx:'#C3DEDD'};bg=dc.bg;tx=dc.tx;valText=dose||'v';}else{bg='#1a1e2e';tx='rgba(195,222,221,0.6)';valText='x';}}
     else if(calView==='effets'){bg=effetsBg(effets);tx=effetsTx(effets);if(effets.length>0){subText=effets.join(' · ');valText='';}else valText='.';}
     el.style.background=bg;
     if(noPrise){el.style.border='1px solid rgba(195,222,221,0.4)';}

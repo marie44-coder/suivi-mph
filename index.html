@@ -189,8 +189,8 @@ function coucherBg(m){if(m==null)return'#1a1e2e';if(m>=150)return'#1a3a45';if(m>
 function coucherTx(m){if(m==null)return'#2a2d35';if(m>=90)return'#C3DEDD';if(m>=30)return'#1a3a45';return'#1a3a45';}
 function priseBg(m){if(m==null)return'#1a1e2e';if(m>=11*60+30)return'#1a3a45';if(m>=11*60)return'#3d6878';if(m>=10*60+30)return'#82B2C0';if(m>=10*60)return'#C3DEDD';if(m>=9*60+30)return'#deeef0';return'#E8F4F5';}
 function priseTx(m){if(m==null)return'#2a2d35';if(m>=11*60)return'#C3DEDD';if(m>=10*60+30)return'#1a3a45';return'#3d6878';}
-function effetsBg(effets){if(!effets||effets.length===0)return'#1e2235';const neg=['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit','Appétit'];const pos=['Concentration','Energie','Motivation','Attention','Clarte'];const hasNeg=effets.some(e=>neg.some(n=>e.includes(n))||e.includes('↓'));const hasPos=effets.some(e=>pos.some(p=>e.includes(p)));if(hasNeg&&hasPos)return'#251a08';if(hasNeg)return'#2a1010';if(hasPos)return'#0f2535';return'#1e2235';}
-function effetsTx(effets){if(!effets||effets.length===0)return'rgba(195,222,221,0.35)';const neg=['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit','App'];const pos=['Concentration','Energie','Motivation','Attention','Clarte'];const hasNeg=effets.some(e=>neg.some(n=>e.includes(n))||e.includes('↓'));const hasPos=effets.some(e=>pos.some(p=>e.includes(p)));if(hasNeg&&hasPos)return'#E8D0A0';if(hasNeg)return'#E8B8A0';if(hasPos)return'#A8CFA8';return'rgba(195,222,221,0.35)';}
+function effetsBg(effets){if(!effets||effets.length===0)return'#1e2235';const neg=['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit','Appétit','Difficulté d\'endormissement','Difficulte d\'endormissement'];const pos=['Concentration','Energie','Motivation','Attention','Clarte','Bonne humeur','Moins fatigué','Moins fatigue'];const hasNeg=effets.some(e=>neg.some(n=>e.includes(n))||e.includes('↓'));const hasPos=effets.some(e=>pos.some(p=>e.includes(p)));if(hasNeg&&hasPos)return'#251a08';if(hasNeg)return'#2a1010';if(hasPos)return'#0f2535';return'#1e2235';}
+function effetsTx(effets){if(!effets||effets.length===0)return'rgba(195,222,221,0.35)';const neg=['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit','App','Difficulté d\'endormissement','Difficulte d\'endormissement'];const pos=['Concentration','Energie','Motivation','Attention','Clarte','Bonne humeur','Moins fatigué','Moins fatigue'];const hasNeg=effets.some(e=>neg.some(n=>e.includes(n))||e.includes('↓'));const hasPos=effets.some(e=>pos.some(p=>e.includes(p)));if(hasNeg&&hasPos)return'#E8D0A0';if(hasNeg)return'#E8B8A0';if(hasPos)return'#A8CFA8';return'rgba(195,222,221,0.35)';}
 
 function buildCalendar(containerId,rows,effetsRows){
   const allRows=rawData.filter(r=>r.jour&&r.jour.trim());
@@ -236,8 +236,8 @@ function buildCalendar(containerId,rows,effetsRows){
     el.style.background=bg;
     if(noPrise){el.style.border='1px solid rgba(195,222,221,0.4)';}
     else if(calView==='effets'){
-      const hasNegB=effets.some(e=>['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit','Appétit'].some(n=>e.includes(n))||e.includes('↓'));
-      const hasPosB=effets.some(e=>['Concentration','Energie','Motivation','Attention','Clarte'].some(p=>e.includes(p)));
+      const hasNegB=effets.some(e=>['Irritabilite','Fatigue','Maux de tete','Agitation','Migraine','Appetit','App\u00e9tit','Difficult\u00e9 d\'endormissement','Difficulte d\'endormissement'].some(n=>e.includes(n))||e.includes('\u2193'));
+      const hasPosB=effets.some(e=>['Concentration','Energie','Motivation','Attention','Clarte','Bonne humeur','Moins fatigu\u00e9','Moins fatigue'].some(p=>e.includes(p)));
       if(effets.length===0)el.style.border='0.5px solid rgba(195,222,221,0.2)';
       else if(hasNegB&&hasPosB)el.style.border='0.5px solid #8a6020';
       else if(hasNegB)el.style.border='0.5px solid #9a3020';

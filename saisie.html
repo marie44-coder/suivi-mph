@@ -277,7 +277,7 @@ async function soumettre(){
   errorBox.style.display = 'none';
 
   const effets = [...document.querySelectorAll('.checkbox-item input:checked')].map(i=>i.value).join(', ');
-  const efficacite = document.getElementById('efficacite').value;
+  const efficacite = state.prise === 'Oui' ? document.getElementById('efficacite').value : '';
   const heure_prise = state.prise === 'Oui' ? document.getElementById('heure_prise').value : '';
   const horaire_coucher = document.getElementById('horaire_coucher').value;
   const fq_repos_moy = document.getElementById('fq_repos_moy').value;

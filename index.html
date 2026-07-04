@@ -487,21 +487,16 @@ function renderDashboard(){
     const ecarts=rows.map(r=>{const p=toMin(r.heure_prise);if(p==null||avgPrise==null)return null;return Math.round(p-avgPrise);}).filter(v=>v!=null);
     const ecartsJours=rows.filter(r=>toMin(r.heure_prise)!=null).map(r=>{const p=r.jour.split('/');return p.length>=2?p[0]+'/'+p[1]:r.jour;});
     const semWeeks=groupByWeek(rows,r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});
-    const wfVals=semWeeks.map(w=>w.val);
-    const wfMean=avgEff;
-    const wfLabels=semWeeks.map(w=>w.label);
-    const wfColors=wfVals.map(function(v){return v!=null?(v>=wfMean?'#82B2C0':'#F6C7B3'):'#2a2d35';});
-    /* annotations delta vs mean */
-    var wfAnnotations={wfmoy:{type:'line',xMin:-0.5,xMax:wfLabels.length-0.5,yMin:wfMean,yMax:wfMean,borderColor:'#82B2C044',borderWidth:1.5,borderDash:[5,4]}};
-    wfVals.forEach(function(v,i){if(v==null||wfMean==null)return;var delta=Math.round(v-wfMean);wfAnnotations['lbl'+i]={type:'label',xValue:i,yValue:v,content:(delta>=0?'+':'')+delta+'%',position:'start',yAdjust:-14,color:delta>=0?'#82B2C0':'#F6C7B3',font:{size:10,weight:'bold'},backgroundColor:'transparent',padding:0};});
+    const wfData=semWeeks.map((w,i)=>i===0?w.val:(w.val!=null&&semWeeks[i-1].val!=null?Math.round(w.val-semWeeks[i-1].val):null));
+    const wfLabels=semWeeks.map((w,i)=>i===0?w.label+' (base)':w.label+(wfData[i]!=null?(wfData[i]>=0?' (+'+wfData[i]+' pts)':' ('+wfData[i]+' pts)'):''));
+    const wfColors=wfData.map((v,i)=>i===0?'#DCECE9':v!=null?(v>=0?'#82B2C0':'#F6C7B3'):'#2a2d35');
     const sem1Eff=semWeeks.slice(0,Math.ceil(semWeeks.length/2)).map(w=>w.val).filter(v=>v!=null);
     const sem2Eff=semWeeks.slice(Math.ceil(semWeeks.length/2)).map(w=>w.val).filter(v=>v!=null);
     const ae1=avg(sem1Eff);const ae2=avg(sem2Eff);
     let wfConclusion='Pas assez de données pour évaluer la tendance.';
     if(ae1!=null&&ae2!=null){const diff=Math.round(ae2-ae1);if(Math.abs(diff)<=3)wfConclusion='Efficacité stable sur les '+semWeeks.length+' semaines observées — pas de tendance nette à ce stade.';else if(diff>0)wfConclusion='Tendance à la hausse : efficacité moyenne en progression de '+diff+' pts entre la première et la deuxième moitié de la période.';else wfConclusion='Tendance à la baisse : efficacité moyenne en recul de '+Math.abs(diff)+' pts entre la première et la deuxième moitié de la période.';}
-    const corrMetrics=['Efficacité','H. prise','FC repos','Coucher','Dose (mg)'];
-    const doseNumeric=rows.map(function(r){return parseNum((r.dose||'').replace('mg',''));});
-    const corrVals=[rows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))),rows.map(r=>toMin(r.heure_prise)),rows.map(r=>parseNum(r.fq_repos_moy)),rows.map(r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;}),doseNumeric];
+    const corrMetrics=['Efficacité','H. prise','FC repos','Coucher'];
+    const corrVals=[rows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))),rows.map(r=>toMin(r.heure_prise)),rows.map(r=>parseNum(r.fq_repos_moy)),rows.map(r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;})];
     const corrMatrix=corrVals.map((a,i)=>corrVals.map((b,j)=>i===j?1:pearson(a,b)));
     let maxCorrVal=0;let maxCorrI=-1;let maxCorrJ=-1;
     corrMatrix.forEach((row,i)=>row.forEach((v,j)=>{if(i<j&&v!=null&&Math.abs(v)>maxCorrVal){maxCorrVal=Math.abs(v);maxCorrI=i;maxCorrJ=j;}}));
@@ -528,19 +523,16 @@ function renderDashboard(){
     setTimeout(()=>{
 
 
-      mkChart('c_wf',{type:'bar',data:{labels:wfLabels,datasets:[
-        {data:wfVals,backgroundColor:wfColors,borderRadius:5,borderWidth:0},
-        {type:'line',data:Array(wfLabels.length).fill(wfMean),borderColor:'#82B2C044',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false}
-      ]},options:{responsive:true,maintainAspectRatio:false,layout:{padding:{top:22}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){if(ctx.datasetIndex===1)return'Moy. '+(wfMean!=null?wfMean:'--')+'%';var v=ctx.raw;if(v==null)return null;var delta=v-wfMean;return v+'% ('+(delta>=0?'+':'')+Math.round(delta)+'% vs moy.)';}}},annotation:{annotations:wfAnnotations}},scales:{x:{ticks:{color:tc,font:{size:10},maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:function(v){return v+'%';},maxTicksLimit:5},grid:{color:gc},min:0,max:100}}}});
+      mkChart('c_wf',{type:'bar',data:{labels:wfLabels,datasets:[{data:wfData,backgroundColor:wfColors,borderRadius:5,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var v=ctx.raw;return v!=null?(v>0?'+':'')+Math.round(v)+'%':null;}}}},scales:{x:{ticks:{color:tc,font:{size:10},maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:function(v){return(v>0?'+':'')+Math.round(v)+'%';},maxTicksLimit:5},grid:{color:gc}}}}});
       mkChart('c_reg',{type:'bar',data:{labels:ecartsJours,datasets:[{data:ecarts,backgroundColor:ecarts.map(v=>v>0?'#F6C7B3':'#DCECE9'),borderRadius:3,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:9},maxTicksLimit:10,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:v=>(v>0?'+':'')+v+' min',maxTicksLimit:5},grid:{color:gc}}}}});
       const effColorSc=v=>{if(v>=50)return'#1a3a45';if(v>=40)return'#3d6878';if(v>=30)return'#82B2C0';return'#C3DEDD';};
-      mkChart('c_sc1',{type:'scatter',data:{datasets:[{data:scatterPriseEff.map(p=>({x:p.x,y:p.y})),backgroundColor:scatterPriseEff.map(p=>effColorSc(p.eff)),pointRadius:6,pointHoverRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'nearest',intersect:false,callbacks:{label:ctx=>fmtH(ctx.raw.x)+' -> '+ctx.raw.y+'%'}}},scales:{x:{ticks:{color:tc,font:{size:9},callback:fmtH,maxTicksLimit:5},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9},callback:v=>v+'%',maxTicksLimit:5},grid:{color:gc},min:0,max:100}}}});
+      mkChart('c_sc1',{type:'scatter',data:{datasets:[{data:scatterPriseEff.map(p=>({x:p.x,y:p.y})),backgroundColor:scatterPriseEff.map(p=>effColorSc(p.eff)),pointRadius:6,pointHoverRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'nearest',intersect:false,callbacks:{label:ctx=>fmtH(ctx.raw.x)+' -> '+ctx.raw.y+'%'}}},scales:{x:{ticks:{color:tc,font:{size:9},callback:fmtH,maxTicksLimit:5},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9},callback:v=>v+'%',maxTicksLimit:5},grid:{color:gc},min:0,max:70}}}});
       mkChart('c_dist',{type:'bar',data:{labels:distLabels,datasets:[{label:'Travaillé',data:travDistData,backgroundColor:'#82B2C0',borderRadius:4,borderWidth:0},{label:'Non-travaillé',data:nonTravDistData,backgroundColor:'#F0E2C3',borderRadius:4,borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},stepSize:1,maxTicksLimit:5},grid:{color:gc}}}}});
       const coucherColorSc=v=>{if(v<=30)return'#C3DEDD';if(v<=60)return'#82B2C0';if(v<=90)return'#3d6878';return'#1a3a45';};
-      mkChart('c_sc2',{type:'scatter',data:{datasets:[{data:scatterCoucherEff,backgroundColor:scatterCoucherEff.map(p=>coucherColorSc(p.x)),pointRadius:6,pointHoverRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'nearest',intersect:false,callbacks:{label:ctx=>'Coucher '+fmtH(ctx.raw.x)+' -> '+ctx.raw.y+'%'}}},scales:{x:{ticks:{color:tc,font:{size:9},callback:fmtH,maxTicksLimit:5},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9},callback:v=>v+'%',maxTicksLimit:5},grid:{color:gc},min:0,max:100}}}});
+      mkChart('c_sc2',{type:'scatter',data:{datasets:[{data:scatterCoucherEff,backgroundColor:scatterCoucherEff.map(p=>coucherColorSc(p.x)),pointRadius:6,pointHoverRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'nearest',intersect:false,callbacks:{label:ctx=>'Coucher '+fmtH(ctx.raw.x)+' -> '+ctx.raw.y+'%'}}},scales:{x:{ticks:{color:tc,font:{size:9},callback:fmtH,maxTicksLimit:5},grid:{color:gc}},y:{ticks:{color:tc,font:{size:9},callback:v=>v+'%',maxTicksLimit:5},grid:{color:gc},min:0,max:70}}}});
       function corrColor(v,isMax){if(v>=0.4)return{bg:'#1a3a45',tx:'#C3DEDD'};if(v>=0.15)return{bg:'#2a3a4a',tx:'#82B2C0'};if(v>=-0.15)return{bg:'#1e2235',tx:'#444'};if(v>=-0.4)return{bg:'#2a2030',tx:'#C3AEDD'};return{bg:'#352040',tx:'#D4B8E8'};}
       const hm=document.getElementById('corr-heatmap');
-      if(hm){const hr=document.createElement('div');hr.style.cssText='display:grid;grid-template-columns:90px repeat(5,1fr);gap:3px;';hr.innerHTML='<div></div>'+corrMetrics.map(m=>'<div style="font-size:11px;color:#888;text-align:center;padding:4px 2px;">'+m+'</div>').join('');hm.appendChild(hr);corrMatrix.forEach((row,i)=>{const r=document.createElement('div');r.style.cssText='display:grid;grid-template-columns:90px repeat(5,1fr);gap:3px;';r.innerHTML='<div style="font-size:11px;color:#888;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;">'+corrMetrics[i]+'</div>'+row.map((v,j)=>{const c=i===j?{bg:'#161920',tx:'#333'}:corrColor(v,false);const b='';const d=i===j?'&mdash;':v!=null?v.toFixed(2):'--';return'<div style="background:'+c.bg+';border-radius:4px;padding:8px 4px;text-align:center;font-size:11px;color:'+c.tx+';font-family:\'DM Mono\',monospace;'+b+'">'+d+'</div>';}).join('');hm.appendChild(r);});}
+      if(hm){const hr=document.createElement('div');hr.style.cssText='display:grid;grid-template-columns:90px repeat(4,1fr);gap:3px;';hr.innerHTML='<div></div>'+corrMetrics.map(m=>'<div style="font-size:11px;color:#888;text-align:center;padding:4px 2px;">'+m+'</div>').join('');hm.appendChild(hr);corrMatrix.forEach((row,i)=>{const r=document.createElement('div');r.style.cssText='display:grid;grid-template-columns:90px repeat(4,1fr);gap:3px;';r.innerHTML='<div style="font-size:11px;color:#888;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;">'+corrMetrics[i]+'</div>'+row.map((v,j)=>{const c=i===j?{bg:'#161920',tx:'#333'}:corrColor(v,false);const b='';const d=i===j?'&mdash;':v!=null?v.toFixed(2):'--';return'<div style="background:'+c.bg+';border-radius:4px;padding:8px 4px;text-align:center;font-size:11px;color:'+c.tx+';font-family:\'DM Mono\',monospace;'+b+'">'+d+'</div>';}).join('');hm.appendChild(r);});}
       const exDiv=document.getElementById('corr-examples');if(exDiv){const examples=[];corrMatrix.forEach((row,i)=>row.forEach((v,j)=>{if(i<j&&v!=null&&Math.abs(v)>=0.3){const interp={
   'Efficacité/H. prise':{
     neg:'Les jours où la prise est plus tardive, l’efficacité ressentie tend à être plus faible. Note : ces jours coïncident souvent avec les week-ends, ce qui peut expliquer l’écart.',
@@ -565,22 +557,6 @@ function renderDashboard(){
   'FC repos/Coucher':{
     pos:'Les nuits les plus tardives sont associées à une FC au repos plus élevée le même jour.',
     neg:'Les nuits les plus tardives sont associées à une FC au repos plus basse le même jour.'
-  },
-  'Efficacité/Dose (mg)':{
-    pos:'Les jours à dose plus élevée sont associés à une meilleure efficacité ressentie.',
-    neg:'Les jours à dose plus élevée correspondent paradoxalement à une efficacité ressentie plus faible — possible effet de facteurs confondants.'
-  },
-  'H. prise/Dose (mg)':{
-    pos:'La dose plus élevée est associée à des prises plus tardives.',
-    neg:'La dose plus élevée est associée à des prises plus matinales.'
-  },
-  'FC repos/Dose (mg)':{
-    pos:'La dose plus élevée est associée à une FC au repos plus élevée — cohérent avec l’effet sympathomimétique du MPH.',
-    neg:'La dose plus élevée est associée à une FC au repos plus basse.'
-  },
-  'Coucher/Dose (mg)':{
-    pos:'Les périodes à dose plus élevée correspondent à des couchers plus tardifs.',
-    neg:'Les périodes à dose plus élevée correspondent à des couchers plus précoces.'
   }
 };
 const key=corrMetrics[i]+'/'+corrMetrics[j];

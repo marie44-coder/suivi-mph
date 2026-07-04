@@ -96,7 +96,7 @@ body{background:#0f1117;color:#fff;font-family:'DM Sans',sans-serif;min-height:1
 .arrow-btn:hover{border-color:#82B2C0;color:#82B2C0;}
 .arrow-btn:disabled{opacity:0.2;cursor:default;}
 .month-name{font-size:13px;font-weight:500;color:#C3DEDD;min-width:80px;text-align:center;}
-.view-select{font-size:12px;color:#aaa;background:#1e2235;border:0.5px solid #2a2d35;border-radius:8px;padding:6px 10px;cursor:pointer;font-family:'DM Sans',sans-serif;outline:none;width:180px;flex-shrink:0;}
+.view-select{font-size:12px;color:#aaa;background:#1e2235;border:0.5px solid #2a2d35;border-radius:8px;padding:6px 10px;cursor:pointer;font-family:'DM Sans',sans-serif;outline:none;width:180px;flex-shrink:0;}@media(max-width:600px){.view-select{width:130px;font-size:11px;padding:5px 6px;}}
 .day-lbls{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px;}
 .dl{font-size:10px;color:#444;text-align:center;}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
@@ -447,9 +447,33 @@ function renderDashboard(){
   if(_ld!==null){var _c2=DOSE_COLORS[_ld];annotationsDose.dEnd={type:'box',xMin:_ds-0.5,xMax:rows.length-0.5,backgroundColor:(_c2?_c2.bg:'#82B2C0')+'22',borderColor:'transparent',borderWidth:0};}
 
   function getEffSeries(gran){
-    if(gran==='semaine'){const w=groupByWeek(rows,r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});return{labels:w.map(x=>x.label),data:w.map(x=>x.val)};}
-    if(gran==='mois'){const m=groupByMonth(rows,r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});return{labels:m.map(x=>x.label),data:m.map(x=>x.val)};}
-    return{labels:shortDates,data:effSerie};
+    var dosesInData=['18mg','36mg','54mg'];
+    if(gran==='semaine'){
+      const w=groupByWeek(rows,r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});
+      var lbls=w.map(x=>x.label);
+      var byDose={};
+      dosesInData.forEach(function(dm){
+        var wd=groupByWeek(rows.filter(function(r){return r.dose===dm&&r.prise==='Oui';}),function(r){var v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});
+        byDose[dm]=lbls.map(function(l){var f=wd.find(function(x){return x.label===l;});return f?f.val:null;});
+      });
+      return{labels:lbls,data:w.map(x=>x.val),byDose:byDose};
+    }
+    if(gran==='mois'){
+      const m=groupByMonth(rows,r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});
+      var lbls=m.map(x=>x.label);
+      var byDose={};
+      dosesInData.forEach(function(dm){
+        var md=groupByMonth(rows.filter(function(r){return r.dose===dm&&r.prise==='Oui';}),function(r){var v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});
+        byDose[dm]=lbls.map(function(l){var f=md.find(function(x){return x.label===l;});return f?f.val:null;});
+      });
+      return{labels:lbls,data:m.map(x=>x.val),byDose:byDose};
+    }
+    /* jour : un tableau par dose */
+    var byDose={};
+    dosesInData.forEach(function(dm){
+      byDose[dm]=rows.map(function(r){var v=parseNum(getField(r,'efficacite_auto-rapportee'));return(r.dose===dm&&r.prise==='Oui'&&v!=null)?Math.round(v*100):null;});
+    });
+    return{labels:shortDates,data:effSerie,byDose:byDose};
   }
   function getHeureSeries(gran){
     if(gran==='semaine'){const wp=groupByWeek(rows,r=>toMin(r.heure_prise));const wc=groupByWeek(rows,r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;});return{labels:wp.map(x=>x.label),prise:wp.map(x=>x.val),coucher:wc.map(x=>x.val)};}
@@ -522,11 +546,18 @@ function renderDashboard(){
     const ae1=avg(sem1Eff);const ae2=avg(sem2Eff);
     let wfConclusion='Pas assez de données pour évaluer la tendance.';
     if(ae1!=null&&ae2!=null){const diff=Math.round(ae2-ae1);if(Math.abs(diff)<=3)wfConclusion='Efficacité stable sur les '+semWeeks.length+' semaines observées — pas de tendance nette à ce stade.';else if(diff>0)wfConclusion='Tendance à la hausse : efficacité moyenne en progression de '+diff+' pts entre la première et la deuxième moitié de la période.';else wfConclusion='Tendance à la baisse : efficacité moyenne en recul de '+Math.abs(diff)+' pts entre la première et la deuxième moitié de la période.';}
-    const corrMetrics=['Efficacité','H. prise','FC repos','Coucher'];
-    const corrDoses=['all',...[...new Set(rows.map(r=>r.dose).filter(Boolean))],'all'].filter((v,i,a)=>a.indexOf(v)===i);
+    const corrMetrics=['Efficacité','H. prise','FC repos','Coucher','Dose (mg)'];
+    const corrDoses=['all',...[...new Set(rows.map(r=>r.dose).filter(Boolean))].sort()].filter((v,i,a)=>a.indexOf(v)===i);
     function getCorrMatrix(filterDose){
       const frows=filterDose==='all'?rows:rows.filter(function(r){return r.dose===filterDose;});
-      const vals=[frows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))),frows.map(r=>toMin(r.heure_prise)),frows.map(r=>parseNum(r.fq_repos_moy)),frows.map(r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;})];
+      const doseNum=frows.map(function(r){return parseNum((r.dose||'').replace('mg',''));});
+      const vals=[
+        frows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))),
+        frows.map(r=>toMin(r.heure_prise)),
+        frows.map(r=>parseNum(r.fq_repos_moy)),
+        frows.map(r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;}),
+        doseNum
+      ];
       return vals.map(function(a,i){return vals.map(function(b,j){return i===j?1:pearson(a,b);});});
     }
     var corrActiveDose='all';
@@ -573,7 +604,7 @@ function renderDashboard(){
       function buildCorrHeatmap(mat){
         if(!hm)return;
         hm.innerHTML='';
-        var grid='display:grid;grid-template-columns:90px repeat(4,1fr);gap:3px;min-width:300px;';
+        var grid='display:grid;grid-template-columns:80px repeat(5,1fr);gap:3px;min-width:340px;';
         var hr2=document.createElement('div');hr2.style.cssText=grid;
         hr2.innerHTML='<div></div>'+corrMetrics.map(function(m){return'<div style="font-size:11px;color:#888;text-align:center;padding:4px 2px;">'+m+'</div>';}).join('');
         hm.appendChild(hr2);
@@ -820,7 +851,12 @@ examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-hei
         var segFn=gran==='jour'?{borderColor:function(ctx){var i=ctx.p0DataIndex;return DOSE_COLORS[allPriseRowsC[i]&&allPriseRowsC[i].dose]?DOSE_COLORS[allPriseRowsC[i].dose].bg:'#82B2C0';}}:{};
         mkChart('c_comp_fc2',{type:'line',data:{labels:labels,datasets:[{data:vals,borderColor:'#F6C7B3',backgroundColor:'transparent',tension:0.4,pointRadius:3,pointBackgroundColor:ptColors,borderWidth:1.5,spanGaps:true,segment:segFn}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){return ctx.raw!=null?Math.round(ctx.raw)+' bpm':null;}}}},scales:{x:{ticks:{color:tc,font:{size:9},maxTicksLimit:8,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:function(v){return v+' bpm';},maxTicksLimit:5},grid:{color:gc}}}}});
       }
-      window.setGranFC2=function(gran,btn){document.querySelectorAll('.gran-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');buildFC2Chart(gran);};
+      window.setGranFC2=function(gran,btn){
+  var wrap=document.getElementById('fc2-gran-wrap');
+  if(wrap)wrap.querySelectorAll('.gran-btn').forEach(function(b){b.classList.remove('active');});
+  if(btn)btn.classList.add('active');
+  buildFC2Chart(gran);
+};
       buildFC2Chart('jour');
 
       const radarLabels=['Efficacit\u00e9','FC normale','R\u00e9gularit\u00e9 prise','Effets positifs','Sans effets n\u00e9gatifs'];
@@ -882,7 +918,20 @@ examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-hei
       });
     }
     Object.assign(effAnn,_annotDoseGran);
-    mkChart('c_eff',{type:'line',data:{labels:effS.labels,datasets:[{data:effS.data,borderColor:'#82B2C0',backgroundColor:'rgba(130,178,192,0.07)',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:granEff==='jour'?rows.map(function(r){return r.prise==='Oui'?(DOSE_COLORS[r.dose]?DOSE_COLORS[r.dose].bg:'#82B2C0'):'#3a3a4a';}):'#82B2C0',borderWidth:2,spanGaps:false},{data:Array(effS.labels.length).fill(avgEff),borderColor:'#82B2C044',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return ctx.raw!=null?(ctx.datasetIndex===0?'Efficacité':'Moy.')+' : '+Math.round(ctx.raw)+'%':null;}}},annotation:{annotations:effAnn}},scales:{x:{ticks:{color:tc,font:{size:10},maxTicksLimit:8,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:function(v){return v+'%';},maxTicksLimit:5},grid:{color:gc},min:0,max:100}}}});
+    var effDatasets=[];
+    if(effS.byDose){
+      ['18mg','36mg','54mg'].forEach(function(dm){
+        var dc=DOSE_COLORS[dm]||{bg:'#82B2C0'};
+        var d=effS.byDose[dm]||[];
+        if(d.some(function(v){return v!=null;})){
+          effDatasets.push({label:dm,data:d,borderColor:dc.bg,backgroundColor:dc.bg+'28',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:dc.bg,borderWidth:2,spanGaps:false});
+        }
+      });
+    } else {
+      effDatasets.push({data:effS.data,borderColor:'#82B2C0',backgroundColor:'rgba(130,178,192,0.15)',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#82B2C0',borderWidth:2,spanGaps:false});
+    }
+    effDatasets.push({data:Array(effS.labels.length).fill(avgEff),borderColor:'#82B2C044',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false});
+    mkChart('c_eff',{type:'line',data:{labels:effS.labels,datasets:effDatasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return ctx.raw!=null?(ctx.datasetIndex===0?'Efficacité':'Moy.')+' : '+Math.round(ctx.raw)+'%':null;}}},annotation:{annotations:effAnn}},scales:{x:{ticks:{color:tc,font:{size:10},maxTicksLimit:8,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:function(v){return v+'%';},maxTicksLimit:5},grid:{color:gc},min:0,max:100}}}});
     const heureS=getHeureSeries(granHeure);
     const annots=granHeure==='jour'?annotations:{};
     mkChart('c_heure',{type:'line',data:{labels:heureS.labels,datasets:[{label:'Heure prise',data:heureS.prise,borderColor:'#C3DEDD',tension:0.4,pointRadius:3,borderWidth:2,fill:false,spanGaps:false,yAxisID:'y'},{label:'Heure coucher',data:heureS.coucher,borderColor:'#F6C7B3',tension:0.4,pointRadius:3,borderWidth:2,fill:false,spanGaps:false,borderDash:[4,3],yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tooltipH,annotation:{annotations:annots}},scales:{x:{ticks:{color:tc,font:{size:10},maxTicksLimit:8,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},padding:8,callback:fmtH,maxTicksLimit:5},grid:{color:gc},min:500,max:780},y2:{position:'right',ticks:{color:tc,font:{size:10},padding:8,callback:fmtH,maxTicksLimit:5},grid:{display:false},min:0,max:220}}}});

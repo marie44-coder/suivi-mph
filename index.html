@@ -748,6 +748,7 @@ examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-hei
       +'<div class="legend"><span><span style="width:22px;height:8px;display:inline-block;border-radius:2px;background:rgba(130,178,192,0.2);border:0.5px solid #82B2C0;"></span>Plage</span><span><span style="width:12px;height:2px;display:inline-block;background:#fff;border-radius:1px;vertical-align:middle;"></span>FC moy.</span></div>'
       +'<div style="position:relative;width:100%;height:160px;"><canvas id="c_comp_fc">FC plages</canvas></div></div>'
       +'<div class="chart-card"><div class="ct">FC repos dans le temps</div>'
+      +'<div class="gran-wrap" id="fc2-gran-wrap"><button class="gran-btn active" id="fc2btn_jour">Jour</button><button class="gran-btn" id="fc2btn_semaine">Semaine</button><button class="gran-btn" id="fc2btn_mois">Mois</button></div>'
       +'<div style="position:relative;width:100%;height:160px;"><canvas id="c_comp_fc2">FC temps</canvas></div></div>'
       +'</div></div>'
       +'<div class="divider"></div>'
@@ -858,6 +859,14 @@ examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-hei
   buildFC2Chart(gran);
 };
       buildFC2Chart('jour');
+      ['jour','semaine','mois'].forEach(function(g){
+        var b=document.getElementById('fc2btn_'+g);
+        if(b)b.addEventListener('click',(function(gran){return function(){
+          document.querySelectorAll('#fc2-gran-wrap .gran-btn').forEach(function(x){x.classList.remove('active');});
+          this.classList.add('active');
+          buildFC2Chart(gran);
+        };})(g));
+      });
 
       const radarLabels=['Efficacit\u00e9','FC normale','R\u00e9gularit\u00e9 prise','Effets positifs','Sans effets n\u00e9gatifs'];
       const maxFCAll=Math.max.apply(null,activeDoses.map(function(dm){return doseStats[dm]?doseStats[dm].avgFC||0:0;}));
@@ -893,7 +902,18 @@ examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-hei
 
   if(currentTab==='overview'){
     buildCalendar('cal-container',rows,effets);
-    if(catLabels.length){mkChart('c_cat_eff',{type:'doughnut',data:{labels:catLabels,datasets:[{data:catVals,backgroundColor:catLabels.map(function(l){return l==='Positifs'?'#82B2C0':'#E08070';}),borderColor:'#161920',borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'right',labels:{color:'#888',font:{size:12},boxWidth:10}},tooltip:{callbacks:{label:function(ctx){return ctx.label+' : '+ctx.raw+' occurrences';}}}}}});}
+    if(catLabels.length){
+      var _cp=catLabels.map(function(l,i){return{l:l,v:catVals[i]};}).sort(function(a,b){return b.v-a.v;});
+      var _cl=_cp.map(function(x){return x.l;});
+      var _cv=_cp.map(function(x){return x.v;});
+      var _cm={'Cognitif':'#82B2C0','Physique':'#F6C7B3','Humeur':'#DCECE9','Sommeil':'#D4A060','Comportemental':'#C3DEDD','Positif':'#8FBF7A','Négatif':'#E08070'};
+      var _cc=_cl.map(function(l,i){var fb=['#82B2C0','#F6C7B3','#DCECE9','#D4A060','#C3E8B0','#F0D0A0'];return _cm[l]||fb[i%6];});
+      mkChart('c_cat_eff',{type:'doughnut',data:{labels:_cl,datasets:[{data:_cv,backgroundColor:_cc,borderColor:'#161920',borderWidth:2}]},
+        options:{responsive:true,maintainAspectRatio:false,
+          plugins:{legend:{display:true,position:'right',
+            labels:{color:'#888',font:{size:12},boxWidth:10}},
+            tooltip:{callbacks:{label:function(ctx){return ctx.label+' ('+ctx.raw+')';}}}}}});
+    }
     const effS=getEffSeries(granEff);
     const avgAnnotation={avg:{type:'line',xMin:-0.5,xMax:effS.labels.length-0.5,yMin:avgEff,yMax:avgEff,borderColor:'transparent',label:{display:true,content:'moy. '+(avgEff!=null?avgEff:'--')+'%',position:'end',color:'#82B2C0',font:{size:11},backgroundColor:'transparent',padding:0}}};
     var effAnn=Object.assign({},avgAnnotation);

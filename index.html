@@ -423,26 +423,18 @@ function renderDashboard(){
     if(t==='0'||t===0){annotations['box'+i]={type:'box',xMin:i-0.5,xMax:i+0.5,backgroundColor:'rgba(255,255,255,0.04)',borderColor:'rgba(255,255,255,0.08)',borderWidth:1};}
   });
   const annotationsPrise={};
-shortDates.forEach(function(l,i){
-  if(rows[i]&&rows[i].prise==='Oui'){
-    annotationsPrise['bp'+i]={type:'box',xMin:i-0.5,xMax:i+0.5,backgroundColor:'rgba(130,178,192,0.07)',borderColor:'transparent',borderWidth:0};
-  }
-});
-const annotationsDose={};
-var _ld=null,_ds=0;
-rows.forEach(function(r,i){
-  if(r.dose!==_ld){
-    if(_ld!==null){
-      var _c=DOSE_COLORS[_ld];
-      annotationsDose['d'+i]={type:'box',xMin:_ds-0.5,xMax:i-0.5,backgroundColor:(_c?_c.bg:'#82B2C0')+'18',borderColor:'transparent',borderWidth:0};
+  shortDates.forEach(function(l,i){
+    if(rows[i]&&rows[i].prise==='Oui'){annotationsPrise['bp'+i]={type:'box',xMin:i-0.5,xMax:i+0.5,backgroundColor:'rgba(130,178,192,0.07)',borderColor:'transparent',borderWidth:0};}
+  });
+  const annotationsDose={};
+  var _ld=null,_ds=0;
+  rows.forEach(function(r,i){
+    if(r.dose!==_ld){
+      if(_ld!==null){var _c=DOSE_COLORS[_ld];annotationsDose['d'+i]={type:'box',xMin:_ds-0.5,xMax:i-0.5,backgroundColor:(_c?_c.bg:'#82B2C0')+'18',borderColor:'transparent',borderWidth:0};}
+      _ld=r.dose;_ds=i;
     }
-    _ld=r.dose;_ds=i;
-  }
-});
-if(_ld!==null){
-  var _c2=DOSE_COLORS[_ld];
-  annotationsDose.dEnd={type:'box',xMin:_ds-0.5,xMax:rows.length-0.5,backgroundColor:(_c2?_c2.bg:'#82B2C0')+'18',borderColor:'transparent',borderWidth:0};
-}
+  });
+  if(_ld!==null){var _c2=DOSE_COLORS[_ld];annotationsDose.dEnd={type:'box',xMin:_ds-0.5,xMax:rows.length-0.5,backgroundColor:(_c2?_c2.bg:'#82B2C0')+'18',borderColor:'transparent',borderWidth:0};}
 
   function getEffSeries(gran){
     if(gran==='semaine'){const w=groupByWeek(rows,r=>{const v=parseNum(getField(r,'efficacite_auto-rapportee'));return v!=null?Math.round(v*100):null;});return{labels:w.map(x=>x.label),data:w.map(x=>x.val)};}

@@ -151,7 +151,7 @@ function mkChart(id,cfg){const el=document.getElementById(id);if(!el)return;cons
 function getField(row,...keys){for(const k of keys){if(row[k]!==undefined&&row[k]!=='')return row[k];}return null;}
 function parseDateStr(str){if(!str)return null;const p=str.split('/');if(p.length<3)return null;return new Date(parseInt(p[2]),parseInt(p[1])-1,parseInt(p[0]));}
 function destroyCharts(){charts.forEach(c=>{try{c.destroy();}catch(e){}});charts=[];}
-const fmtH=v=>{if(v==null||typeof v!=='number')return null;const h=Math.floor(v/60);const m=Math.round(v%60);return h.toString().padStart(2,'0')+'h'+m.toString().padStart(2,'0');};
+const fmtH=v=>{if(v==null||typeof v!=='number')return null;var n=v<0?v+1440:v;const h=Math.floor(n/60);const m=Math.round(n%60);return h.toString().padStart(2,'0')+'h'+m.toString().padStart(2,'0');};
 const tooltipH={mode:'index',intersect:false,callbacks:{label:ctx=>{const v=ctx.raw;if(v==null||typeof v!=='number')return null;if(ctx.dataset.yAxisID==='y'||ctx.dataset.yAxisID==='y2')return ctx.dataset.label+': '+fmtH(v);return ctx.dataset.label+': '+v;}}};
 
 async function fetchSheet(sheetName){
@@ -943,19 +943,13 @@ examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-hei
     /* fond coloré par dose sur toutes les granularités */
 
     var effDatasets=[];
-    if(effS.byDose){
-      ['18mg','36mg','54mg'].forEach(function(dm){
-        var dc=DOSE_COLORS[dm]||{bg:'#82B2C0'};
-        var d=effS.byDose[dm]||[];
-        if(d.some(function(v){return v!=null;})){
-          effDatasets.push({label:dm,data:d,borderColor:dc.bg,backgroundColor:dc.bg+'28',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:dc.bg,borderWidth:2,spanGaps:false});
-        }
-      });
-    } else {
-      effDatasets.push({data:effS.data,borderColor:'#82B2C0',backgroundColor:'rgba(130,178,192,0.15)',fill:true,tension:0.4,pointRadius:3,pointBackgroundColor:'#82B2C0',borderWidth:2,spanGaps:false});
-    }
+    var _effPtColors=effS.labels.map(function(l,i){
+      var r=rows[i];if(!r)return '#82B2C0';
+      return DOSE_COLORS[r.dose]?DOSE_COLORS[r.dose].bg:'#82B2C0';
+    });
+    effDatasets.push({data:effS.data,borderColor:'#82B2C0',backgroundColor:'transparent',fill:false,tension:0.4,pointRadius:3,pointBackgroundColor:_effPtColors,borderWidth:2,spanGaps:true,segment:{borderColor:function(ctx){var i=ctx.p0DataIndex;return _effPtColors[i]||'#82B2C0';}}});
     effDatasets.push({data:Array(effS.labels.length).fill(avgEff),borderColor:'#82B2C044',borderWidth:1.5,borderDash:[5,4],pointRadius:0,fill:false});
-    mkChart('c_eff',{type:'line',data:{labels:effS.labels,datasets:effDatasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return ctx.raw!=null?(ctx.datasetIndex===0?'Efficacité':'Moy.')+' : '+Math.round(ctx.raw)+'%':null;}}},annotation:{annotations:effAnn}},scales:{x:{ticks:{color:tc,font:{size:10},maxTicksLimit:8,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:function(v){return v+'%';},maxTicksLimit:5},grid:{color:gc},min:0,max:100}}}});
+    mkChart('c_eff',{type:'line',data:{labels:effS.labels,datasets:effDatasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,callbacks:{label:function(ctx){return ctx.raw!=null?(ctx.datasetIndex===0?'Efficacité':'Moy.')+' : '+Math.round(ctx.raw)+'%':null;}}},annotation:{annotations:effAnn}},scales:{x:{ticks:{color:tc,font:{size:10},maxTicksLimit:8,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:function(v){return v+'%';},maxTicksLimit:5,padding:8},grid:{color:gc},min:-5,max:100}}}});
     const heureS=getHeureSeries(granHeure);
     const annots=granHeure==='jour'?annotations:{};
     mkChart('c_heure',{type:'line',data:{labels:heureS.labels,datasets:[{label:'Heure prise',data:heureS.prise,borderColor:'#C3DEDD',tension:0.4,pointRadius:3,borderWidth:2,fill:false,spanGaps:false,yAxisID:'y'},{label:'Heure coucher',data:heureS.coucher,borderColor:'#F6C7B3',tension:0.4,pointRadius:3,borderWidth:2,fill:false,spanGaps:false,borderDash:[4,3],yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:tooltipH,annotation:{annotations:annots}},scales:{x:{ticks:{color:tc,font:{size:10},maxTicksLimit:8,maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},padding:8,callback:fmtH,maxTicksLimit:5},grid:{color:gc},min:390,max:780},y2:{position:'right',ticks:{color:tc,font:{size:10},padding:8,callback:fmtH,maxTicksLimit:5},grid:{display:false},min:-120,max:220}}}});

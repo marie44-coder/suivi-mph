@@ -437,14 +437,6 @@ function renderDashboard(){
     if(rows[i]&&rows[i].prise==='Oui'){annotationsPrise['bp'+i]={type:'box',xMin:i-0.5,xMax:i+0.5,backgroundColor:'rgba(130,178,192,0.07)',borderColor:'transparent',borderWidth:0};}
   });
   const annotationsDose={};
-  var _ld=null,_ds=0;
-  rows.forEach(function(r,i){
-    if(r.dose!==_ld){
-      if(_ld!==null){var _c=DOSE_COLORS[_ld];annotationsDose['d'+i]={type:'box',xMin:_ds-0.5,xMax:i-0.5,backgroundColor:(_c?_c.bg:'#82B2C0')+'22',borderColor:'transparent',borderWidth:0};}
-      _ld=r.dose;_ds=i;
-    }
-  });
-  if(_ld!==null){var _c2=DOSE_COLORS[_ld];annotationsDose.dEnd={type:'box',xMin:_ds-0.5,xMax:rows.length-0.5,backgroundColor:(_c2?_c2.bg:'#82B2C0')+'22',borderColor:'transparent',borderWidth:0};}
 
   function getEffSeries(gran){
     var dosesInData=['18mg','36mg','54mg'];
@@ -500,7 +492,7 @@ function renderDashboard(){
 '<div class="sec"><div class="slabel">Efficacité du traitement</div>'+
 '<div class="kcard g"><div class="klabel">Efficacité moyenne</div><div class="kval g">'+(avgEff!=null?avgEff+'%':'--')+'</div><div class="ksub" style="color:#888;">Sur <span style="color:#F0E2C3;">'+nPrise+'</span> jour'+(nPrise>1?'s':'')+' avec prise</div></div>'+
 '<div class="grid2"><div class="mini"><div class="mini-l">Meilleur jour</div><div class="mini-v" style="color:#DCECE9;font-size:15px;">'+(bestIdx>=0?formatDate(rows[bestIdx].jour):'--')+'</div><div style="font-size:12px;color:#555;margin-top:4px;">'+(bestIdx>=0?Math.round(maxEff*100)+'%':'')+'</div></div><div class="mini"><div class="mini-l">Pire jour</div><div class="mini-v" style="color:#F6C7B3;font-size:15px;">'+(worstIdx>=0?formatDate(rows[worstIdx].jour):'--')+'</div><div style="font-size:12px;color:#555;margin-top:4px;">'+(worstIdx>=0?Math.round(minEff*100)+'%':'')+'</div></div></div>'+
-'<div class="chart-card"><div class="ct">Évolution de l’efficacité</div><div class="gran-wrap"><button class="gran-btn '+(gE==='jour'?'active':'')+'" onclick="setGran(this,\'eff\')">Jour</button><button class="gran-btn '+(gE==='semaine'?'active':'')+'" onclick="setGran(this,\'eff\')">Semaine</button><button class="gran-btn '+(gE==='mois'?'active':'')+'" onclick="setGran(this,\'eff\')">Mois</button></div><div style="position:relative;width:100%;height:180px;"><canvas id="c_eff" role="img" aria-label="Courbe efficacité">Efficacité</canvas></div></div></div>'+
+'<div class="chart-card"><div class="ct">Évolution de l’efficacité</div><div class="gran-wrap"><button class="gran-btn '+(gE==='jour'?'active':'')+'" onclick="setGran(this,\'eff\')">Jour</button><button class="gran-btn '+(gE==='semaine'?'active':'')+'" onclick="setGran(this,\'eff\')">Semaine</button><button class="gran-btn '+(gE==='mois'?'active':'')+'" onclick="setGran(this,\'eff\')">Mois</button></div><div style="position:relative;width:100%;height:180px;"><div class=\"legend\"><span><span class=\"lsq\" style=\"background:#82B2C028;\"></span>18mg</span><span><span class=\"lsq\" style=\"background:#8FBF7A28;\"></span>36mg</span><span><span class=\"lsq\" style=\"background:#D4A06028;\"></span>54mg</span></div><canvas id="c_eff" role="img" aria-label="Courbe efficacité">Efficacité</canvas></div></div></div>'+
 '<div class="divider"></div>'+
 '<div class="sec"><div class="slabel">Heure de la prise</div>'+
 '<div class="kcard b"><div class="klabel">Heure moyenne</div><div class="kval b">'+minToStr(avgPrise)+'</div><div class="ksub">min <span class="hi">'+minToStr(minPrise)+'</span> · max <span class="lo">'+minToStr(maxPrise)+'</span> · écart-type <span class="bl">'+(stdPrise!=null?stdPrise+' min':'--')+'</span></div></div>'+
@@ -550,18 +542,22 @@ function renderDashboard(){
     const corrDoses=['all',...[...new Set(rows.map(r=>r.dose).filter(Boolean))].sort()].filter((v,i,a)=>a.indexOf(v)===i);
     function getCorrMatrix(filterDose){
       const frows=filterDose==='all'?rows:rows.filter(function(r){return r.dose===filterDose;});
-      const doseNum=frows.map(function(r){return parseNum((r.dose||'').replace('mg',''));});
-      const vals=[
+      var metrics=filterDose==='all'
+        ?['Efficacité','H. prise','FC repos','Coucher','Dose (mg)']
+        :['Efficacité','H. prise','FC repos','Coucher'];
+      var vals=[
         frows.map(r=>parseNum(getField(r,'efficacite_auto-rapportee'))),
         frows.map(r=>toMin(r.heure_prise)),
         frows.map(r=>parseNum(r.fq_repos_moy)),
-        frows.map(r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;}),
-        doseNum
+        frows.map(r=>{const v=parseNum(r.coucher_min);return(v!=null&&v>0)?v:null;})
       ];
-      return vals.map(function(a,i){return vals.map(function(b,j){return i===j?1:pearson(a,b);});});
+      if(filterDose==='all')vals.push(frows.map(function(r){return parseNum((r.dose||'').replace('mg',''));}));
+      return{matrix:vals.map(function(a,i){return vals.map(function(b,j){return i===j?1:pearson(a,b);});}),metrics:metrics};
     }
     var corrActiveDose='all';
-    var corrMatrix=getCorrMatrix('all');
+    var _corrResult=getCorrMatrix('all');
+    var corrMatrix=_corrResult.matrix;
+    var corrMetricsActive=_corrResult.metrics;
     let maxCorrVal=0;let maxCorrI=-1;let maxCorrJ=-1;
     corrMatrix.forEach((row,i)=>row.forEach((v,j)=>{if(i<j&&v!=null&&Math.abs(v)>maxCorrVal){maxCorrVal=Math.abs(v);maxCorrI=i;maxCorrJ=j;}}));
     const maxCorrDir=maxCorrI>=0?corrMatrix[maxCorrI][maxCorrJ]:null;
@@ -604,7 +600,7 @@ function renderDashboard(){
       function buildCorrHeatmap(mat){
         if(!hm)return;
         hm.innerHTML='';
-        var grid='display:grid;grid-template-columns:80px repeat(5,1fr);gap:3px;min-width:340px;';
+        var nCols=corrMetrics.length;var grid='display:grid;grid-template-columns:80px repeat('+nCols+',1fr);gap:3px;min-width:'+(280+nCols*50)+'px;';
         var hr2=document.createElement('div');hr2.style.cssText=grid;
         hr2.innerHTML='<div></div>'+corrMetrics.map(function(m){return'<div style="font-size:11px;color:#888;text-align:center;padding:4px 2px;">'+m+'</div>';}).join('');
         hm.appendChild(hr2);
@@ -629,8 +625,10 @@ function renderDashboard(){
       }
       window.corrFilterDose=function(dose){
         corrDosesAll.forEach(function(d){var b=document.getElementById('corrBtn_'+d);if(b){b.style.borderColor=d===dose?'#82B2C0':'#2a2d35';b.style.color=d===dose?'#82B2C0':'#666';}});
-        buildCorrHeatmap(getCorrMatrix(dose));
-        updateCorrExamples(getCorrMatrix(dose));
+        var _res=getCorrMatrix(dose);
+        corrMetrics=_res.metrics;
+        buildCorrHeatmap(_res.matrix);
+        updateCorrExamples(_res.matrix);
       };
       buildCorrHeatmap(corrMatrix);
       function updateCorrExamples(mat){
@@ -843,7 +841,12 @@ examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-hei
           var mfc=groupByMonth(allPriseRowsC,function(r){return parseNum(r.fq_repos_moy);});
           labels=mfc.map(function(m){return m.label;});
           vals=mfc.map(function(m){return m.val;});
-          ptColors=labels.map(function(){return'#82B2C0';});
+          ptColors=mfc.map(function(m){
+            var wkRows=allPriseRowsC.filter(function(r){var d=parseDateStr(r.jour);return d&&(MOIS[d.getMonth()]+' '+String(d.getFullYear()).slice(2))===m.label;});
+            var counts={};wkRows.forEach(function(r){counts[r.dose]=(counts[r.dose]||0)+1;});
+            var dom=null,mx=0;Object.keys(counts).forEach(function(k){if(counts[k]>mx){mx=counts[k];dom=k;}});
+            return dom&&DOSE_COLORS[dom]?DOSE_COLORS[dom].bg:'#82B2C0';
+          });
         } else {
           labels=allPriseRowsC.map(function(r){var p=r.jour.split('/');return p.length>=2?p[0]+'/'+p[1]:r.jour;});
           vals=allPriseRowsC.map(function(r){return parseNum(r.fq_repos_moy);});
@@ -918,26 +921,7 @@ examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-hei
     const avgAnnotation={avg:{type:'line',xMin:-0.5,xMax:effS.labels.length-0.5,yMin:avgEff,yMax:avgEff,borderColor:'transparent',label:{display:true,content:'moy. '+(avgEff!=null?avgEff:'--')+'%',position:'end',color:'#82B2C0',font:{size:11},backgroundColor:'transparent',padding:0}}};
     var effAnn=Object.assign({},avgAnnotation);
     /* fond coloré par dose sur toutes les granularités */
-    var _effLabels=effS.labels;
-    var _annotDoseGran={};
-    if(granEff==='jour'){
-      Object.assign(_annotDoseGran,annotationsDose);
-    } else {
-      /* pour semaine/mois : calculer la dose dominante de chaque période */
-      _effLabels.forEach(function(lbl,i){
-        var periodRows=rows.filter(function(r){
-          if(granEff==='semaine'){var d=parseDateStr(r.jour);return d&&(d.getDate().toString().padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0'))===lbl;}
-          if(granEff==='mois'){var d=parseDateStr(r.jour);return d&&(MOIS[d.getMonth()]+' '+String(d.getFullYear()).slice(2))===lbl;}
-          return false;
-        });
-        var counts={};periodRows.forEach(function(r){if(r.dose)counts[r.dose]=(counts[r.dose]||0)+1;});
-        var dom=null,mx=0;Object.keys(counts).forEach(function(k){if(counts[k]>mx){mx=counts[k];dom=k;}});
-        if(dom&&DOSE_COLORS[dom]){
-          _annotDoseGran['dp'+i]={type:'box',xMin:i-0.5,xMax:i+0.5,backgroundColor:DOSE_COLORS[dom].bg+'22',borderColor:'transparent',borderWidth:0};
-        }
-      });
-    }
-    Object.assign(effAnn,_annotDoseGran);
+
     var effDatasets=[];
     if(effS.byDose){
       ['18mg','36mg','54mg'].forEach(function(dm){

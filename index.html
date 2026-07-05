@@ -34,7 +34,7 @@ body{background:#0f1117;color:#fff;font-family:'DM Sans',sans-serif;min-height:1
 .tab{padding:14px 28px;font-size:14px;color:#555;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;background:transparent;border-top:none;border-left:none;border-right:none;font-family:'DM Sans',sans-serif;}
 .tab.active{color:#C3DEDD;border-bottom:2px solid #82B2C0;font-weight:500;}
 .tab:hover:not(.active){color:#888;}
-.filters{background:#161920;border:0.5px solid #2a2d35;border-radius:12px;padding:16px 18px;margin-bottom:20px;}
+.filters{background:#161920;border:0.5px solid #2a2d35;border-radius:12px;padding:16px 18px;margin-bottom:20px;overflow:hidden;}
 .filters-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
 .filters-label{font-size:12px;color:#555;text-transform:uppercase;letter-spacing:0.1em;}
 .reset-btn{background:transparent;border:0.5px solid #2a2d35;border-radius:8px;padding:6px 14px;font-size:12px;color:#666;cursor:pointer;font-family:'DM Sans',sans-serif;}
@@ -43,8 +43,8 @@ body{background:#0f1117;color:#fff;font-family:'DM Sans',sans-serif;min-height:1
 .date-wrap{display:flex;flex-direction:column;gap:4px;}
 .date-label{font-size:12px;color:#555;}
 .date-input{background:#1e2235;border:0.5px solid #2a2d35;border-radius:8px;padding:8px 12px;font-size:13px;color:#aaa;width:160px;outline:none;font-family:'DM Sans',sans-serif;}
-.pills-row{display:flex;gap:0;border-bottom:1px solid #2a2d35;}
-.filter-pill-tab{background:transparent;border:none;border-bottom:2px solid #2a2d35;padding:9px 18px;font-size:13px;color:#666;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px;margin-bottom:-1px;transition:all 0.15s;appearance:none;-webkit-appearance:none;outline:none;}
+.pills-row{display:flex;gap:0;border-bottom:1px solid #2a2d35;overflow:hidden;}
+.filter-pill-tab{background:transparent;border:none;border-bottom:2px solid #2a2d35;padding:9px 12px;font-size:12px;color:#666;cursor:pointer;font-family:'DM Sans',sans-serif;display:inline-flex;align-items:center;gap:5px;margin-bottom:-1px;transition:all 0.15s;appearance:none;-webkit-appearance:none;outline:none;}
 .filter-pill-tab.active-pill{color:#C3DEDD;border-bottom:2px solid #82B2C0;}
 .gran-wrap{display:flex;gap:4px;margin-bottom:12px;}
 .gran-btn{background:transparent;border:0.5px solid #2a2d35;border-radius:8px;padding:4px 12px;font-size:11px;color:#555;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all 0.15s;}
@@ -117,10 +117,11 @@ body{background:#0f1117;color:#fff;font-family:'DM Sans',sans-serif;min-height:1
 /* mobile filters */
 @media(max-width:600px){
   .pills-row{flex-direction:column;border-bottom:none;}
-  .filter-pill-tab{border-bottom:0.5px solid #2a2d35;width:100%;}
+  .filter-pill-tab{border-bottom:0.5px solid #2a2d35;width:100%;padding:8px 10px;font-size:11px;}
   .filters-dates{flex-direction:column;}
   .date-input{width:100%;}
-  .view-select{max-width:160px;}
+  .view-select{max-width:140px;font-size:11px;}
+  .filters{padding:12px 14px;}
 }
 .cc{border:0.5px solid rgba(195,222,221,0.15);}
 .cc-day{font-size:11px;font-weight:500;}
@@ -538,7 +539,7 @@ function renderDashboard(){
     const ae1=avg(sem1Eff);const ae2=avg(sem2Eff);
     let wfConclusion='Pas assez de données pour évaluer la tendance.';
     if(ae1!=null&&ae2!=null){const diff=Math.round(ae2-ae1);if(Math.abs(diff)<=3)wfConclusion='Efficacité stable sur les '+semWeeks.length+' semaines observées — pas de tendance nette à ce stade.';else if(diff>0)wfConclusion='Tendance à la hausse : efficacité moyenne en progression de '+diff+' pts entre la première et la deuxième moitié de la période.';else wfConclusion='Tendance à la baisse : efficacité moyenne en recul de '+Math.abs(diff)+' pts entre la première et la deuxième moitié de la période.';}
-    const corrMetrics=['Efficacité','H. prise','FC repos','Coucher','Dose (mg)'];
+    var corrMetrics=['Efficacité','H. prise','FC repos','Coucher','Dose (mg)'];
     const corrDoses=['all',...[...new Set(rows.map(r=>r.dose).filter(Boolean))].sort()].filter((v,i,a)=>a.indexOf(v)===i);
     function getCorrMatrix(filterDose){
       const frows=filterDose==='all'?rows:rows.filter(function(r){return r.dose===filterDose;});
@@ -597,16 +598,17 @@ function renderDashboard(){
       const hm=document.getElementById('corr-heatmap');
       var corrDosesAll=['all',...[...new Set(rows.map(function(r){return r.dose;}).filter(Boolean))]];
       function corrColor2(v){if(v>=0.4)return{bg:'#1a3a45',tx:'#C3DEDD'};if(v>=0.15)return{bg:'#2a3a4a',tx:'#82B2C0'};if(v>=-0.15)return{bg:'#1e2235',tx:'#444'};if(v>=-0.4)return{bg:'#2a2030',tx:'#C3AEDD'};return{bg:'#352040',tx:'#D4B8E8'};}
-      function buildCorrHeatmap(mat){
+      function buildCorrHeatmap(mat,metrics){
+        metrics=metrics||corrMetrics;
         if(!hm)return;
         hm.innerHTML='';
-        var nCols=corrMetrics.length;var grid='display:grid;grid-template-columns:80px repeat('+nCols+',1fr);gap:3px;min-width:'+(280+nCols*50)+'px;';
+        var nCols=metrics.length;var grid='display:grid;grid-template-columns:80px repeat('+nCols+',1fr);gap:3px;min-width:'+(280+nCols*50)+'px;';
         var hr2=document.createElement('div');hr2.style.cssText=grid;
-        hr2.innerHTML='<div></div>'+corrMetrics.map(function(m){return'<div style="font-size:11px;color:#888;text-align:center;padding:4px 2px;">'+m+'</div>';}).join('');
+        hr2.innerHTML='<div></div>'+metrics.map(function(m){return'<div style="font-size:11px;color:#888;text-align:center;padding:4px 2px;">'+m+'</div>';}).join('');
         hm.appendChild(hr2);
         mat.forEach(function(row,i){
           var r2=document.createElement('div');r2.style.cssText=grid;
-          r2.innerHTML='<div style="font-size:11px;color:#888;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;">'+corrMetrics[i]+'</div>'
+          r2.innerHTML='<div style="font-size:11px;color:#888;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;">'+metrics[i]+'</div>'
             +row.map(function(v,j){var c=i===j?{bg:'#161920',tx:'#333'}:corrColor2(v);var d=i===j?'&mdash;':v!=null?v.toFixed(2):'--';return'<div style="background:'+c.bg+';border-radius:4px;padding:8px 4px;text-align:center;font-size:11px;color:'+c.tx+';font-family:\'DM Mono\',monospace;">'+d+'</div>';}).join('');
           hm.appendChild(r2);
         });
@@ -627,12 +629,13 @@ function renderDashboard(){
         corrDosesAll.forEach(function(d){var b=document.getElementById('corrBtn_'+d);if(b){b.style.borderColor=d===dose?'#82B2C0':'#2a2d35';b.style.color=d===dose?'#82B2C0':'#666';}});
         var _res=getCorrMatrix(dose);
         corrMetrics=_res.metrics;
-        buildCorrHeatmap(_res.matrix);
-        updateCorrExamples(_res.matrix);
+        buildCorrHeatmap(_res.matrix,_res.metrics);
+        updateCorrExamples(_res.matrix,_res.metrics);
       };
-      buildCorrHeatmap(corrMatrix);
-      function updateCorrExamples(mat){
-        const exDiv=document.getElementById('corr-examples');if(!exDiv)return;const examples=[];corrMatrix.forEach((row,i)=>row.forEach((v,j)=>{if(i<j&&v!=null&&Math.abs(v)>=0.3){const interp={
+      buildCorrHeatmap(corrMatrix,corrMetrics);
+      function updateCorrExamples(mat,metrics){
+        metrics=metrics||corrMetrics;
+        const exDiv=document.getElementById('corr-examples');if(!exDiv)return;const examples=[];mat.forEach((row,i)=>row.forEach((v,j)=>{if(i<j&&v!=null&&Math.abs(v)>=0.3){const interp={
   'Efficacité/H. prise':{
     neg:'Les jours où la prise est plus tardive, l’efficacité ressentie tend à être plus faible. Note : ces jours coïncident souvent avec les week-ends, ce qui peut expliquer l’écart.',
     pos:'Les jours où la prise est plus tardive, l’efficacité ressentie tend à être plus élevée.'
@@ -674,11 +677,11 @@ function renderDashboard(){
     neg:'Les périodes à dose plus élevée correspondent à des couchers plus précoces.'
   }
 };
-const key=corrMetrics[i]+'/'+corrMetrics[j];
+const key=metrics[i]+'/'+metrics[j];
 const entry=interp[key];
 const txt=entry?(v>0?entry.pos:entry.neg):(v>0?'Les deux métriques ont tendance à augmenter ensemble.':'Quand l’une augmente, l’autre tend à diminuer.');
-examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-height:1.6;"><span style="color:#C3DEDD;font-weight:500;">'+corrMetrics[i]+' / '+corrMetrics[j]+'</span> <span style="color:#555;">(r = '+v.toFixed(2)+')</span><br><span style="color:#888;">'+txt+'</span></div>');}}));exDiv.innerHTML=examples.length?'<div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Exemples de lecture</div>'+examples.join(''):'<div style="font-size:12px;color:#444;">Pas de corr\u00e9lation notable.</div>';}
-      updateCorrExamples(corrMatrix);
+examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-height:1.6;"><span style="color:#C3DEDD;font-weight:500;">'+metrics[i]+' / '+metrics[j]+'</span> <span style="color:#555;">(r = '+v.toFixed(2)+')</span><br><span style="color:#888;">'+txt+'</span></div>');}}));exDiv.innerHTML=examples.length?'<div style="font-size:11px;color:#555;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Exemples de lecture</div>'+examples.join(''):'<div style="font-size:12px;color:#444;">Pas de corr\u00e9lation notable.</div>';}
+      updateCorrExamples(corrMatrix,corrMetrics);
     },100);
   }
   else if(currentTab==='comparatif'){
@@ -909,7 +912,7 @@ examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-hei
       var _cp=catLabels.map(function(l,i){return{l:l,v:catVals[i]};}).sort(function(a,b){return b.v-a.v;});
       var _cl=_cp.map(function(x){return x.l;});
       var _cv=_cp.map(function(x){return x.v;});
-      var _cm={'Cognitif':'#82B2C0','Physique':'#F6C7B3','Humeur':'#DCECE9','Sommeil':'#D4A060','Comportemental':'#C3DEDD','Positif':'#8FBF7A','Négatif':'#E08070'};
+      var _cm={'Cognitif':'#7EB8C9','Physique':'#E0946A','Humeur':'#8FC49A','Sommeil':'#C4956A','Comportemental':'#9AB8D4','Positif':'#82B88A','Négatif':'#C96A6A'};
       var _cc=_cl.map(function(l,i){var fb=['#82B2C0','#F6C7B3','#DCECE9','#D4A060','#C3E8B0','#F0D0A0'];return _cm[l]||fb[i%6];});
       mkChart('c_cat_eff',{type:'doughnut',data:{labels:_cl,datasets:[{data:_cv,backgroundColor:_cc,borderColor:'#161920',borderWidth:2}]},
         options:{responsive:true,maintainAspectRatio:false,

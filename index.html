@@ -796,7 +796,7 @@ examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-hei
         const data=bins.map(function(b){return s.effDist.filter(function(v){return b===100?v*100===100:v*100>=b&&v*100<b+10;}).length/total;});
         return{label:dm,data:data,borderColor:dc.bg,backgroundColor:dc.bg+'22',fill:true,tension:0.5,pointRadius:0,borderWidth:2};
       }).filter(Boolean);
-      mkChart('c_comp_kde',{type:'line',data:{labels:bins.map(function(b){return b+'%';}),datasets:kdeDatasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},y:{display:false,min:0,max:0.6}}}});
+      mkChart('c_comp_kde',{type:'line',data:{labels:bins.map(function(b){return b+'%';}),datasets:kdeDatasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var pct=Math.round(ctx.raw*1000)/10;return ctx.dataset.label+' : '+pct+'% des jours';}}}},scales:{x:{ticks:{color:tc,font:{size:10}},grid:{color:gc}},y:{display:false,min:0,max:0.6}}}});
 
       mkChart('c_comp_evo',{type:'bar',data:{labels:semLabelsC,datasets:[
         {type:'bar',data:Array(semLabelsC.length).fill(100),backgroundColor:semBgColors,borderWidth:0,barPercentage:1,categoryPercentage:1},
@@ -816,7 +816,7 @@ examples.push('<div style="font-size:12px;color:#aaa;margin-bottom:10px;line-hei
             return dom&&DOSE_COLORS[dom]?DOSE_COLORS[dom].bg:'#82B2C0';
           }}
         }
-      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{filter:function(item){return item.datasetIndex!==0;},callbacks:{label:function(ctx){var v=ctx.raw;return v!=null?'Efficacité : '+v+'%':null;}}},annotation:{annotations:evoAnnotC}},scales:{x:{ticks:{color:tc,font:{size:10},maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:function(v){return v+'%';},maxTicksLimit:5},grid:{color:gc},min:0,max:100}}}});
+      ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{filter:function(item){return item.datasetIndex!==0;},callbacks:{label:function(ctx){var v=ctx.raw;return v!=null?'Efficacité : '+Math.round(v)+'%':null;}}},annotation:{annotations:evoAnnotC}},scales:{x:{ticks:{color:tc,font:{size:10},maxRotation:0},grid:{color:gc}},y:{ticks:{color:tc,font:{size:10},callback:function(v){return v+'%';},maxTicksLimit:5},grid:{color:gc},min:0,max:100}}}});
 
       const fcLabelsC=activeDoses;
       const fcMinC=activeDoses.map(function(dm){return doseStats[dm]?doseStats[dm].avgFCMin:null;});
